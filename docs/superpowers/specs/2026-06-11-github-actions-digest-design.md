@@ -32,7 +32,7 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──�
 3. **正文层**：每条资讯获取正文用于 AI 总结。优先级：feed 自带 `content`/`description`（足够长则直接用）→ 抓文章页用 trafilatura 提取正文 → 都失败则仅标题。正文截断至前 2000 字符控制 token 用量
 4. **AI 层**：GitHub Models 两段式调用——先分批（每批 8-10 篇）把每篇正文压成核心总结，再单次调用完成剔除无关、跨源合并、四主题分组与排序，输出 JSON
 5. **输出层**：`docs/digest.xml`（RSS，每天一条富 HTML entry，按日 guid 去重）、`docs/index.html`（最新日报 + 历史归档入口）、`docs/archive/YYYY-MM-DD.html`（每日存档）
-6. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Pages 从分支 `/docs` 目录发布；随后 Telegram bot 推送（超长自动分多条消息）+ 网页链接
+6. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Pages 从分支 `/docs` 目录发布；随后 Telegram bot 推送（超长自动分多条消息）+ 网页链接。推送目标由 `TG_CHAT_ID` 决定：填用户 chat ID 推私聊，填频道 `@用户名` 或 `-100` 开头 ID 推频道（bot 需为频道管理员并有发帖权限）——推荐建专用频道，日报按天沉淀、可拉人订阅
 
 **每条资讯的呈现 = 标题 + 来源 + 分级核心总结 + 原文链接**。总结目标是读完即掌握核心内容（发生了什么、关键数字/政策变动、对卖家的影响），原文链接仅备查，不是必读。三个通道（RSS entry、网页、Telegram）展示同一份分组总结，网页版按四主题分栏、组内重要在前。
 
