@@ -12,19 +12,21 @@
 | 决策点 | 选择 |
 |---|---|
 | 运行模式 | GitHub Actions 全托管（docker 栈退役） |
-| 阅读形态 | 手机 RSS 阅读器 + GitHub Pages 网页 + Telegram 推送 |
+| 阅读形态 | 手机 RSS 阅读器 + 网页日报 + Telegram 推送 |
 | AI 摘要 | GitHub Models（免费，GITHUB_TOKEN 调用） |
 | 关注方向 | 平台政策、国际物流/海运空运、关税与贸易合规、电商大盘 |
-| 状态与发布 | 提交制：产物和去重状态 commit 回仓库，Pages 从分支发布 |
+| 状态与发布 | 提交制：产物和去重状态 commit 回仓库 |
+| 托管平台 | Cloudflare Pages（用户博客已占用 GitHub Pages；域名同在 Cloudflare，接入零摩擦，带宽不限量，国内可达性更好） |
+| 访问域名 | `rss.cgio.qzz.io`（用户托管在 Cloudflare 的域名） |
 
-前提：GitHub 免费版 Pages 仅支持公开仓库，本仓库设为 public。资讯内容本身公开，无敏感数据；凭据一律放 GitHub Secrets。
+仓库设为 public（用户选择：Actions 分钟数不限量、便于分享；Cloudflare Pages 本身也支持私有仓库，后续可随时转私有）。资讯内容本身公开，无敏感数据；凭据一律放 GitHub Secrets。
 
 ## 总体架构
 
 单一 Python 管道 `pipeline.py`，GitHub Actions 定时触发（cron `0 23 * * *` UTC = 北京时间 07:00，另支持 `workflow_dispatch` 手动触发）：
 
 ```
-sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──→ AI 层 ──→ 输出层 ──→ commit ──→ Pages / Telegram
+sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──→ AI 层 ──→ 输出层 ──→ commit ──→ Cloudflare Pages / Telegram
 ```
 
 1. **抓取层**：`type: rss` 的源用 feedparser 解析；`type: scrape` 的源复用现有 app.py 的「URL 正则提取」逻辑（抗改版，不依赖 CSS class）
@@ -32,7 +34,7 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──�
 3. **正文层**：每条资讯获取正文用于 AI 总结。优先级：feed 自带 `content`/`description`（足够长则直接用）→ 抓文章页用 trafilatura 提取正文 → 都失败则仅标题。正文截断至前 2000 字符控制 token 用量
 4. **AI 层**：GitHub Models 两段式调用——先分批（每批 8-10 篇）把每篇正文压成核心总结，再单次调用完成剔除无关、跨源合并、四主题分组与排序，输出 JSON
 5. **输出层**：`docs/digest.xml`（RSS，每天一条富 HTML entry，按日 guid 去重）、`docs/index.html`（最新日报 + 历史归档入口）、`docs/archive/YYYY-MM-DD.html`（每日存档）
-6. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Pages 从分支 `/docs` 目录发布；随后 Telegram bot 推送（超长自动分多条消息）+ 网页链接。推送目标由 `TG_CHAT_ID` 决定：填用户 chat ID 推私聊，填频道 `@用户名` 或 `-100` 开头 ID 推频道（bot 需为频道管理员并有发帖权限）——推荐建专用频道，日报按天沉淀、可拉人订阅
+6. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Cloudflare Pages 通过 Git 集成监听 main 分支自动发布（构建命令留空，输出目录 `docs/`），绑定自定义域 `rss.cgio.qzz.io`；随后 Telegram bot 推送（超长自动分多条消息）+ 网页链接。推送目标由 `TG_CHAT_ID` 决定：填用户 chat ID 推私聊，填频道 `@用户名` 或 `-100` 开头 ID 推频道（bot 需为频道管理员并有发帖权限）——推荐建专用频道，日报按天沉淀、可拉人订阅
 
 **每条资讯的呈现 = 标题 + 来源 + 分级核心总结 + 原文链接**。总结目标是读完即掌握核心内容（发生了什么、关键数字/政策变动、对卖家的影响），原文链接仅备查，不是必读。三个通道（RSS entry、网页、Telegram）展示同一份分组总结，网页版按四主题分栏、组内重要在前。
 
@@ -82,7 +84,7 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──�
 | 单源抓取失败 | 跳过，记录到「源异常」小节，不阻塞 |
 | 单篇正文提取失败 | 降级链：feed 自带摘要 → 仅标题（标注「仅标题」），不阻塞 |
 | AI 调用/解析失败 | 重试一次后降级（map 失败退回标题，reduce 失败按源 category 归类） |
-| Telegram 推送失败 | 仅打日志，不影响 Pages 发布 |
+| Telegram 推送失败 | 仅打日志，不影响网页发布 |
 | 全部源失败 | 仍生成日报，标题标注「今日抓取异常」 |
 | 程序崩溃（未处理异常） | Gotify 故障通知（见下），随后非 0 退出 |
 | workflow 本身失败 | Gotify 兜底通知 + GitHub 默认邮件通知 |
@@ -101,14 +103,16 @@ Gotify 推送自身失败时仅打日志，不掩盖原始异常（原始 traceb
 - pytest 单测覆盖纯函数：URL 正则提取（雨果/亿邦真实 HTML 片段 fixture）、关键词过滤、seen 去重与过期清理、正文降级链（feed 内容→提取→仅标题）、RSS/HTML 渲染、AI 返回 JSON 的解析与降级路径
 - 网络与 AI 调用一律 mock，测试不出网
 - CI：workflow 含 test job，日报 job 依赖其通过
-- 手动验证：`workflow_dispatch` 触发一次全流程，检查 Pages 三类产物与 Telegram 推送
+- 手动验证：`workflow_dispatch` 触发一次全流程，检查 `rss.cgio.qzz.io` 上三类产物（首页/归档/digest.xml）与 Telegram 推送
 
 ## 仓库整理与迁移
 
 - `git init`，建 GitHub 公开仓库，推送
 - 现有 docker 栈文件（docker-compose.yml、crossborder-feeds.tar.gz、app.py、digest.py、sites.yml、.env.example）移入 `legacy/` 归档，不删除（app.py 的提取逻辑与 sites.yml 配置会被新代码复用/迁移）
 - 重写 README 与 CLAUDE.md，反映新架构
-- 仓库 Settings：启用 Pages（分支 `/docs`）、配置 Secrets（`TG_BOT_TOKEN`、`TG_CHAT_ID`、`GOTIFY_URL`、`GOTIFY_TOKEN`）——需用户在 GitHub 网页操作的步骤会在实施计划中单独列出
+- GitHub 仓库 Settings：配置 Secrets（`TG_BOT_TOKEN`、`TG_CHAT_ID`、`GOTIFY_URL`、`GOTIFY_TOKEN`）
+- Cloudflare 控制台：创建 Pages 项目 → Git 集成绑定本仓库（构建命令留空、输出目录 `docs/`）→ 自定义域绑定 `rss.cgio.qzz.io`
+- 以上需用户在网页操作的步骤会在实施计划中单独列出
 - 安全注意：Gotify token 曾在对话中明文出现，建议配置完 Secrets 后在 Gotify 后台轮换一次 token，再把新值填入 Secrets
 
 ## 非目标（YAGNI）
