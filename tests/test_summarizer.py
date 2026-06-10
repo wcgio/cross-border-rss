@@ -55,3 +55,28 @@ def test_group_items_degrades_on_ai_error():
     items = [{"url": "u1", "title": "A", "summary": "", "source": "S", "category": "compliance"}]
     groups = summarizer.group_items(items, "tok", chat=fail_chat)
     assert [it["url"] for it in groups["compliance"]] == ["u1"]
+
+
+def test_group_by_category_routes_unknown_category_to_market():
+    items = [{"url": "u1", "title": "A", "summary": "", "source": "S", "category": "weird"}]
+    groups = summarizer.group_by_category(items)
+    assert [it["url"] for it in groups["market"]] == ["u1"]
+    assert set(groups.keys()) == set(summarizer.CATEGORIES)
+
+
+def test_group_items_backfill_routes_unknown_category_to_market():
+    items = [{"url": "u1", "title": "A", "summary": "s", "source": "S", "category": "weird"}]
+
+    def fake_chat(prompt, token, max_tokens=2000):
+        return {"groups": {"platform": [], "logistics": [], "compliance": [], "market": []}, "merged": []}
+
+    groups = summarizer.group_items(items, "tok", chat=fake_chat)
+    assert [it["url"] for it in groups["market"]] == ["u1"]
+    assert set(groups.keys()) == set(summarizer.CATEGORIES)
+
+
+def test_summarize_batch_caps_summary_length():
+    def fake_chat(prompt, token, max_tokens=2000):
+        return {"results": [{"id": 1, "relevant": True, "importance": "normal", "summary": "长" * 2000}]}
+    out = summarizer.summarize_batch(ITEMS[:1], "tok", chat=fake_chat)
+    assert len(out[0]["summary"]) == 500

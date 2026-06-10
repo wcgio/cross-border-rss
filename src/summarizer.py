@@ -78,7 +78,7 @@ def summarize_batch(items, token, chat=_chat_json):
         else:
             out.append({
                 **it,
-                "summary": (r.get("summary") or "").strip(),
+                "summary": (r.get("summary") or "").strip()[:500],
                 "importance": r.get("importance") if r.get("importance") in ("high", "normal") else "normal",
             })
     return out
@@ -99,7 +99,8 @@ def group_by_category(items):
     """降级路径：按源配置的 category 归类，不调 AI。"""
     result = {key: [] for key in CATEGORIES}
     for it in items:
-        result.setdefault(it.get("category") or "market", []).append(it)
+        cat = it.get("category") if it.get("category") in CATEGORIES else "market"
+        result[cat].append(it)
     return result
 
 
@@ -124,7 +125,8 @@ def group_items(items, token, chat=_chat_json):
                     result[key].append(items[i - 1])
         for i, it in enumerate(items, 1):  # AI 漏分的条目回退源 category
             if i not in used and i not in drop:
-                result.setdefault(it.get("category") or "market", []).append(it)
+                cat = it.get("category") if it.get("category") in CATEGORIES else "market"
+                result[cat].append(it)
         return result
     except (AIError, KeyError, TypeError, AttributeError):
         return group_by_category(items)
