@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>Test Feed</title>
+<link>https://example.com</link>
+<description>test</description>
+<item>
+  <title>Ocean freight rates jump 20%</title>
+  <link>https://example.com/a1</link>
+  <description>Spot rates rose sharply on Asia-Europe lanes this week.</description>
+  <pubDate>Wed, 10 Jun 2026 08:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Port congestion eases</title>
+  <link>https://example.com/a2</link>
+  <description>Congestion at major hubs eased.</description>
+  <pubDate>Wed, 10 Jun 2026 09:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
