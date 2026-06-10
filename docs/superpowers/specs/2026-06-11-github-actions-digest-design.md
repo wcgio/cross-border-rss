@@ -24,22 +24,26 @@
 单一 Python 管道 `pipeline.py`，GitHub Actions 定时触发（cron `0 23 * * *` UTC = 北京时间 07:00，另支持 `workflow_dispatch` 手动触发）：
 
 ```
-sources.yml ──→ 抓取层 ──→ 处理层 ──→ AI 层 ──→ 输出层 ──→ commit ──→ Pages / Telegram
+sources.yml ──→ 抓取层 ──→ 处理层 ──→ 正文层 ──→ AI 层 ──→ 输出层 ──→ commit ──→ Pages / Telegram
 ```
 
 1. **抓取层**：`type: rss` 的源用 feedparser 解析；`type: scrape` 的源复用现有 app.py 的「URL 正则提取」逻辑（抗改版，不依赖 CSS class）
 2. **处理层**：每源 include/exclude 关键词过滤 → `data/seen.json` 跨天去重（保留 7 天窗口，自动清理过期条目）
-3. **AI 层**：GitHub Models 单次调用完成剔除无关、跨源合并同一事件、四主题分组、每条一句话要点，输出 JSON
-4. **输出层**：`docs/digest.xml`（RSS，每天一条富 HTML entry，按日 guid 去重）、`docs/index.html`（最新日报 + 历史归档入口）、`docs/archive/YYYY-MM-DD.html`（每日存档）
-5. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Pages 从分支 `/docs` 目录发布；随后 Telegram bot 推送分组要点 + 网页链接
+3. **正文层**：每条资讯获取正文用于 AI 总结。优先级：feed 自带 `content`/`description`（足够长则直接用）→ 抓文章页用 trafilatura 提取正文 → 都失败则仅标题。正文截断至前 2000 字符控制 token 用量
+4. **AI 层**：GitHub Models 两段式调用——先分批（每批 8-10 篇）把每篇正文压成核心总结，再单次调用完成剔除无关、跨源合并、四主题分组与排序，输出 JSON
+5. **输出层**：`docs/digest.xml`（RSS，每天一条富 HTML entry，按日 guid 去重）、`docs/index.html`（最新日报 + 历史归档入口）、`docs/archive/YYYY-MM-DD.html`（每日存档）
+6. **发布**：workflow 把 `docs/` 与 `data/seen.json` commit 回主分支，Pages 从分支 `/docs` 目录发布；随后 Telegram bot 推送（超长自动分多条消息）+ 网页链接
+
+**每条资讯的呈现 = 标题 + 来源 + 分级核心总结 + 原文链接**。总结目标是读完即掌握核心内容（发生了什么、关键数字/政策变动、对卖家的影响），原文链接仅备查，不是必读。三个通道（RSS entry、网页、Telegram）展示同一份分组总结，网页版按四主题分栏、组内重要在前。
 
 ## 模块边界
 
 | 模块 | 职责 | 输入 → 输出 |
 |---|---|---|
-| `fetcher.py` | 抓单个源 | 源配置 → 条目列表 `[{url, title, source, category, pub}]` |
+| `fetcher.py` | 抓单个源 | 源配置 → 条目列表 `[{url, title, source, category, pub, feed_content}]` |
 | `filters.py` | 关键词过滤 + seen 去重 | 条目列表 + seen 集合 → 过滤后列表 |
-| `summarizer.py` | GitHub Models 调用与降级 | 条目列表 → 分组结构 `{category: [{point, urls}]}` |
+| `extractor.py` | 获取每条资讯的正文 | 条目 → 条目 + `text`（feed 内容 / trafilatura 提取 / 空） |
+| `summarizer.py` | GitHub Models 两段式调用与降级 | 条目列表（含正文）→ 分组结构 `{category: [{title, summary, importance, url, source}]}` |
 | `render.py` | RSS / HTML 渲染 | 分组结构 + 条目 → digest.xml / html 字符串 |
 | `notify.py` | Telegram 推送 + Gotify 故障通知 | 分组结构 → bot API 调用；异常信息 → Gotify message API |
 | `pipeline.py` | 编排以上各步 | sources.yml → 落盘产物 |
@@ -66,15 +70,18 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ AI 层 ──→ �
 - 端点：`https://models.github.ai/inference/chat/completions`（OpenAI 兼容）
 - 鉴权：workflow 中 `permissions: models: read`，用 `GITHUB_TOKEN`，无需额外 key
 - 模型：`openai/gpt-4o-mini`（免费额度内；模型 ID 可经环境变量覆盖）
-- Prompt 要求输出 JSON：剔除与跨境电商/外贸/国际物流无关的条目 → 同一事件多源合并 → 按四主题分组 → 每条一句中文要点并引用原文条目索引
-- 输出经 JSON 解析校验；解析失败重试一次，仍失败则**降级**：按源 `category` 归类输出纯标题列表，日报照常生成
+- **两段式调用**：
+  1. *逐篇总结（map）*：每批 8-10 篇正文一次调用（全天约 6-8 次），每篇输出中文核心总结 + 重要性分级。**分级标准**：重大政策/费用/关税变动等高影响资讯给 3-4 句详细总结（含关键数字、生效时间、对卖家的影响）；一般资讯 1-2 句。同时剔除与跨境电商/外贸/国际物流无关的条目
+  2. *分组排序（reduce）*：单次调用，输入各篇总结，完成同一事件跨源合并、四主题分组、组内按重要性排序，输出 JSON
+- 输出经 JSON 解析校验；解析失败重试一次，仍失败则**降级**：跳过该批/该步，map 失败的条目退回标题展示，reduce 失败则按源 `category` 归类，日报照常生成
 
 ## 错误处理
 
 | 故障 | 行为 |
 |---|---|
 | 单源抓取失败 | 跳过，记录到「源异常」小节，不阻塞 |
-| AI 调用/解析失败 | 重试一次后降级为关键词归类列表 |
+| 单篇正文提取失败 | 降级链：feed 自带摘要 → 仅标题（标注「仅标题」），不阻塞 |
+| AI 调用/解析失败 | 重试一次后降级（map 失败退回标题，reduce 失败按源 category 归类） |
 | Telegram 推送失败 | 仅打日志，不影响 Pages 发布 |
 | 全部源失败 | 仍生成日报，标题标注「今日抓取异常」 |
 | 程序崩溃（未处理异常） | Gotify 故障通知（见下），随后非 0 退出 |
@@ -91,7 +98,7 @@ Gotify 推送自身失败时仅打日志，不掩盖原始异常（原始 traceb
 
 ## 测试
 
-- pytest 单测覆盖纯函数：URL 正则提取（雨果/亿邦真实 HTML 片段 fixture）、关键词过滤、seen 去重与过期清理、RSS/HTML 渲染、AI 返回 JSON 的解析与降级路径
+- pytest 单测覆盖纯函数：URL 正则提取（雨果/亿邦真实 HTML 片段 fixture）、关键词过滤、seen 去重与过期清理、正文降级链（feed 内容→提取→仅标题）、RSS/HTML 渲染、AI 返回 JSON 的解析与降级路径
 - 网络与 AI 调用一律 mock，测试不出网
 - CI：workflow 含 test job，日报 job 依赖其通过
 - 手动验证：`workflow_dispatch` 触发一次全流程，检查 Pages 三类产物与 Telegram 推送
@@ -106,7 +113,6 @@ Gotify 推送自身失败时仅打日志，不掩盖原始异常（原始 traceb
 
 ## 非目标（YAGNI）
 
-- 不做全文抓取/正文提取（标题 + 链接 + AI 要点已满足日报场景）
 - 不做企业微信推送（用户未选）
 - 不做代理池/反爬对抗（先观察首跑结果）
 - 不保留 FreshRSS 已读同步（全托管模式的已知取舍，用户已确认）
