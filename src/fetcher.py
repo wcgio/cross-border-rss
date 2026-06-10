@@ -34,7 +34,11 @@ def fetch_url(url, encoding=None):
 def parse_rss(cfg, xml_text):
     feed = feedparser.parse(xml_text)
     items = []
-    for e in feed.entries[:MAX_ITEMS_PER_SOURCE]:
+    for e in feed.entries:
+        url = e.get("link", "")
+        title = (e.get("title") or "").strip()
+        if not url or not title:
+            continue
         content = ""
         if e.get("content"):
             content = e["content"][0].get("value", "")
@@ -44,14 +48,16 @@ def parse_rss(cfg, xml_text):
         if e.get("published_parsed"):
             pub = dt.datetime(*e["published_parsed"][:6], tzinfo=dt.timezone.utc)
         items.append({
-            "url": e.get("link", ""),
-            "title": (e.get("title") or "").strip(),
+            "url": url,
+            "title": title,
             "source": cfg["name"],
             "category": cfg["category"],
             "pub": pub,
             "feed_content": content,
         })
-    return [it for it in items if it["url"] and it["title"]]
+        if len(items) >= MAX_ITEMS_PER_SOURCE:
+            break
+    return items
 
 
 def parse_listing(cfg, html):
@@ -64,7 +70,9 @@ def parse_listing(cfg, html):
         if not pattern.search(a["href"]):
             continue
         url = urljoin(base, a["href"])
-        if urlparse(base).netloc not in urlparse(url).netloc:
+        url_netloc = urlparse(url).netloc
+        base_netloc = urlparse(base).netloc
+        if not (url_netloc == base_netloc or url_netloc.endswith("." + base_netloc)):
             continue
         title = re.sub(r"\s+", " ", (a.get("title") or a.get_text(" ", strip=True)) or "").strip()
         pub = None

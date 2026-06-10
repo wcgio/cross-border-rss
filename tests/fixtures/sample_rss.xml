@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
 <title>Test Feed</title>
 <link>https://example.com</link>
@@ -15,6 +15,16 @@
   <link>https://example.com/a2</link>
   <description>Congestion at major hubs eased.</description>
   <pubDate>Wed, 10 Jun 2026 09:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Atom-style content entry</title>
+  <link>https://example.com/a3</link>
+  <content:encoded><![CDATA[<p>Full body content here for coverage.</p>]]></content:encoded>
+</item>
+<item>
+  <title></title>
+  <link>https://example.com/a4</link>
+  <description>entry without title must be dropped</description>
 </item>
 </channel>
 </rss>
