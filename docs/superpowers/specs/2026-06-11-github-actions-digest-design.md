@@ -41,7 +41,7 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ AI 层 ──→ �
 | `filters.py` | 关键词过滤 + seen 去重 | 条目列表 + seen 集合 → 过滤后列表 |
 | `summarizer.py` | GitHub Models 调用与降级 | 条目列表 → 分组结构 `{category: [{point, urls}]}` |
 | `render.py` | RSS / HTML 渲染 | 分组结构 + 条目 → digest.xml / html 字符串 |
-| `notify.py` | Telegram 推送 | 分组结构 → bot API 调用 |
+| `notify.py` | Telegram 推送 + Gotify 故障通知 | 分组结构 → bot API 调用；异常信息 → Gotify message API |
 | `pipeline.py` | 编排以上各步 | sources.yml → 落盘产物 |
 
 各模块为纯函数优先（网络 IO 集中在 fetcher / summarizer / notify），便于单测。
@@ -77,7 +77,17 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ AI 层 ──→ �
 | AI 调用/解析失败 | 重试一次后降级为关键词归类列表 |
 | Telegram 推送失败 | 仅打日志，不影响 Pages 发布 |
 | 全部源失败 | 仍生成日报，标题标注「今日抓取异常」 |
-| workflow 本身失败 | GitHub 默认邮件通知 |
+| 程序崩溃（未处理异常） | Gotify 故障通知（见下），随后非 0 退出 |
+| workflow 本身失败 | Gotify 兜底通知 + GitHub 默认邮件通知 |
+
+### 崩溃通知（Gotify）
+
+程序崩溃或 workflow 失败时，推送异常位置与报错信息到用户自托管的 Gotify 服务，两层兜底：
+
+1. **程序内**：`pipeline.py` 顶层 try/except 捕获未处理异常，提取异常类型、出错位置（文件、行号、函数）与报错信息，POST 到 `{GOTIFY_URL}/message?token={GOTIFY_TOKEN}`（高优先级），然后以非 0 退出。通知内容只含 traceback 摘要，**不得包含任何凭据或环境变量值**。
+2. **workflow 层**：日报 job 末尾加 `if: failure()` 兜底 step，用 curl 推送「workflow 失败 + run 链接」，覆盖 Python 启动前的故障（依赖安装失败等）。
+
+Gotify 推送自身失败时仅打日志，不掩盖原始异常（原始 traceback 仍输出到 Actions 日志）。
 
 ## 测试
 
@@ -91,7 +101,8 @@ sources.yml ──→ 抓取层 ──→ 处理层 ──→ AI 层 ──→ �
 - `git init`，建 GitHub 公开仓库，推送
 - 现有 docker 栈文件（docker-compose.yml、crossborder-feeds.tar.gz、app.py、digest.py、sites.yml、.env.example）移入 `legacy/` 归档，不删除（app.py 的提取逻辑与 sites.yml 配置会被新代码复用/迁移）
 - 重写 README 与 CLAUDE.md，反映新架构
-- 仓库 Settings：启用 Pages（分支 `/docs`）、配置 Secrets（`TG_BOT_TOKEN`、`TG_CHAT_ID`）——需用户在 GitHub 网页操作的步骤会在实施计划中单独列出
+- 仓库 Settings：启用 Pages（分支 `/docs`）、配置 Secrets（`TG_BOT_TOKEN`、`TG_CHAT_ID`、`GOTIFY_URL`、`GOTIFY_TOKEN`）——需用户在 GitHub 网页操作的步骤会在实施计划中单独列出
+- 安全注意：Gotify token 曾在对话中明文出现，建议配置完 Secrets 后在 Gotify 后台轮换一次 token，再把新值填入 Secrets
 
 ## 非目标（YAGNI）
 
