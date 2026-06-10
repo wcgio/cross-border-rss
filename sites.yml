@@ -1,0 +1,38 @@
+# feedmaker 站点配置。新增来源只需复制一段，改 4 个字段即可。
+#
+# 字段说明：
+#   name             RSS 标题（阅读器里显示的名字）
+#   list_url         要抓取的列表/栏目页
+#   base_url         站点根，用于把相对链接补全为绝对链接
+#   link_pattern     "文章链接" 的正则。只匹配文章、排除导航/标签链接
+#   title_strip_time 标题尾部若带 "2026-06-08 15:56:01" 这类时间戳，设 true 会剥离并用作发布时间
+#   encoding         可选，页面非 UTF-8 时指定（如 gbk）
+
+sites:
+  cifnews:
+    name: "雨果跨境 · 平台资讯"
+    list_url: "https://www.cifnews.com/subject/news"
+    base_url: "https://www.cifnews.com"
+    link_pattern: "/article/\\d{4,}"
+    language: "zh-cn"
+    # 想换成"平台动态/官方资讯"栏目，把 list_url 改成：
+    #   https://www.cifnews.com/crossborder/platformnews
+
+  ebrun:
+    name: "亿邦动力 · 跨境电商"
+    list_url: "https://m.ebrun.com/label/6.html"
+    base_url: "https://m.ebrun.com"
+    link_pattern: "/\\d{5,}\\.html"
+    title_strip_time: true
+    language: "zh-cn"
+    # 只看快讯：把 list_url 改成 https://m.ebrun.com/newest
+    # 关键词过滤（可选）：include 命中任一才留；exclude 命中任一就丢。例：
+    # exclude: ["招聘", "广告", "直播预告"]
+    # include: ["亚马逊", "TikTok", "Temu", "关税", "物流", "政策", "合规"]
+
+  # ── 示例：以后想加新站，照着填即可 ──────────────
+  # maijia:
+  #   name: "卖家之家"
+  #   list_url: "https://www.maijia.com/news"
+  #   base_url: "https://www.maijia.com"
+  #   link_pattern: "/article/\\d+"
