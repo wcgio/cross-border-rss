@@ -31,3 +31,11 @@ def test_update_seen_adds_and_prunes():
     assert "old" not in out
     assert out["kept"] == "2026-06-08"
     assert out["u2"] == "2026-06-11"
+
+
+def test_update_seen_drops_malformed_dates():
+    today = dt.date(2026, 6, 11)
+    seen = {"bad": "not-a-date", "kept": "2026-06-08"}
+    out = filters.update_seen(seen, [], today, keep_days=7)
+    assert "bad" not in out
+    assert out["kept"] == "2026-06-08"

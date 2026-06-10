@@ -23,9 +23,16 @@ def dedup_unseen(items, seen):
 
 
 def update_seen(seen, items, today, keep_days=7):
-    """把本次条目并入 seen，并清理超过 keep_days 的旧记录。"""
+    """把本次条目并入 seen，并清理超过 keep_days 的旧记录。非法日期会被丢弃。"""
     cutoff = today - dt.timedelta(days=keep_days)
-    kept = {u: d for u, d in seen.items() if dt.date.fromisoformat(d) >= cutoff}
+    kept = {}
+    for u, d in seen.items():
+        try:
+            if dt.date.fromisoformat(d) >= cutoff:
+                kept[u] = d
+        except ValueError:
+            # 忽略格式错误的日期记录
+            pass
     for it in items:
         kept[it["url"]] = today.isoformat()
     return kept
