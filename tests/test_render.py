@@ -13,12 +13,11 @@ GROUPS = {
 
 
 def test_render_groups_html_sections_and_escaping():
-    body = render.render_groups_html(GROUPS, source_errors=[("坏源", "HTTP 502")])
+    body = render.render_groups_html(GROUPS)
     assert "平台政策" in body and "国际物流" in body
     assert "重大政策&lt;标题&gt;" in body  # HTML 转义
     assert 'class="high"' in body
     assert "仅标题" in body                # 无总结的条目有标注
-    assert "源异常" in body and "坏源" in body
 
 
 def test_render_groups_html_skips_empty_sections():

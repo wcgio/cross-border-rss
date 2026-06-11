@@ -73,7 +73,7 @@ def run():
     groups = group_items(summarized, token) if summarized else {}
     count = sum(len(v) for v in groups.values())
 
-    body = render.render_groups_html(groups, source_errors)
+    body = render.render_groups_html(groups)
     if not summarized:
         body = "<p>过去24小时没有新资讯。</p>" + body
     title = f"跨境/物流日报 {date_str}" + (f"（{count} 条）" if count else "（无新内容）")

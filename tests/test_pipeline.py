@@ -67,7 +67,7 @@ def test_run_records_source_errors(tmp_path, monkeypatch):
     pipeline.run()  # 不应崩溃
 
     index = (tmp_path / "docs" / "index.html").read_text(encoding="utf-8")
-    assert "源异常" in index and "Broken" in index
+    assert "源异常" not in index   # 源故障详情不对外展示
     assert "今日抓取异常" in index
 
 
@@ -115,7 +115,7 @@ def test_run_partial_source_failure_no_abnormal_title(tmp_path, monkeypatch):
     pipeline.run()
 
     index = (tmp_path / "docs" / "index.html").read_text(encoding="utf-8")
-    assert "源异常" in index and "Bad" in index
+    assert "源异常" not in index and "Bad" not in index   # 源故障详情不对外展示
     assert "今日抓取异常" not in index   # 只有部分失败时不打异常标
 
 

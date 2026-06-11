@@ -36,7 +36,7 @@ a {{ color: inherit; }}
 """
 
 
-def render_groups_html(groups, source_errors=()):
+def render_groups_html(groups):
     parts = []
     for key, label in CATEGORIES.items():
         items = groups.get(key) or []
@@ -54,11 +54,6 @@ def render_groups_html(groups, source_errors=()):
             url = it["url"] if it["url"].startswith(("https://", "http://")) else "#"
             parts.append(f'<p class="meta"><a href="{html.escape(url)}">原文 ↗</a></p></article>')
         parts.append("</section>")
-    if source_errors:
-        parts.append("<section><h2>源异常</h2><ul>")
-        for name, err in source_errors:
-            parts.append(f"<li>{html.escape(name)}：{html.escape(err)}</li>")
-        parts.append("</ul></section>")
     return "".join(parts)
 
 
