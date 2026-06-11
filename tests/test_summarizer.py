@@ -80,3 +80,21 @@ def test_summarize_batch_caps_summary_length():
         return {"results": [{"id": 1, "relevant": True, "importance": "normal", "summary": "长" * 2000}]}
     out = summarizer.summarize_batch(ITEMS[:1], "tok", chat=fake_chat)
     assert len(out[0]["summary"]) == 500
+
+
+def test_groups_put_high_importance_first():
+    items = [
+        {"url": "u1", "title": "普通A", "summary": "s", "importance": "normal", "source": "S", "category": "platform"},
+        {"url": "u2", "title": "重点B", "summary": "s", "importance": "high", "source": "S", "category": "platform"},
+        {"url": "u3", "title": "普通C", "summary": "s", "importance": "normal", "source": "S", "category": "platform"},
+        {"url": "u4", "title": "重点D", "summary": "s", "importance": "high", "source": "S", "category": "platform"},
+    ]
+    groups = summarizer.group_by_category(items)
+    assert [it["url"] for it in groups["platform"]] == ["u2", "u4", "u1", "u3"]  # 重点在前，组内保持原相对顺序
+
+    def fake_chat(prompt, token, max_tokens=2000):
+        return {"groups": {"platform": [1, 2, 3, 4], "logistics": [], "compliance": [], "market": []},
+                "merged": []}
+
+    groups = summarizer.group_items(items, "tok", chat=fake_chat)
+    assert [it["url"] for it in groups["platform"]] == ["u2", "u4", "u1", "u3"]  # AI 排序不可靠，代码强制重点在前

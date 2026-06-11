@@ -27,6 +27,8 @@ article.high {{ border-left: 3px solid #e0a000; }}
 article p:last-child {{ margin-bottom: 0; }}
 article h3 {{ margin-top: 0; }}
 .meta {{ color: #888; font-size: .85em; margin: 2px 0; }}
+.badge {{ background: #e0a000; color: #fff; font-size: .72em; font-weight: 600;
+  padding: 1px 6px; border-radius: 4px; margin-right: 6px; vertical-align: 2px; }}
 a {{ color: inherit; }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
@@ -57,7 +59,9 @@ a {{ color: inherit; }}
 
 
 def _render_article(it):
-    cls = "high" if it.get("importance") == "high" else "normal"
+    high = it.get("importance") == "high"
+    cls = "high" if high else "normal"
+    badge = '<span class="badge">重点</span>' if high else ""
     url = it["url"] if it["url"].startswith(("https://", "http://")) else "#"
     summary = (
         f"<p>{html.escape(it['summary'])}</p>"
@@ -65,7 +69,7 @@ def _render_article(it):
         else '<p class="meta">（仅标题，未能获取正文）</p>'
     )
     return (
-        f'<article class="{cls}"><h3>{html.escape(it["title"])}</h3>'
+        f'<article class="{cls}"><h3>{badge}{html.escape(it["title"])}</h3>'
         f'<p class="meta">{html.escape(it.get("source") or "")}</p>'
         f"{summary}"
         f'<p class="meta"><a href="{html.escape(url)}">原文 ↗</a></p></article>'

@@ -80,3 +80,9 @@ def test_render_groups_tabbed_structure():
 def test_render_groups_tabbed_empty():
     assert render.render_groups_tabbed({}) == ""
     assert render.render_groups_tabbed({"platform": []}) == ""
+
+
+def test_high_importance_article_gets_badge():
+    body = render.render_groups_html(GROUPS)
+    assert '<span class="badge">重点</span>' in body
+    assert body.count('<span class="badge">') == 1   # 普通条目没有角标

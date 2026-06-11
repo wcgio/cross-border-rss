@@ -50,8 +50,10 @@ MAP_PROMPT = """你是跨境电商行业资讯编辑。下面有 {n} 篇文章�
 {"results": [{"id": 1, "relevant": true, "importance": "high", "summary": "..."}]}
 规则：
 - 与跨境电商/外贸/国际物流无关的条目 relevant 设为 false，不写 summary
-- importance 取 "high" 或 "normal"。high＝重大平台政策/费用/佣金/关税/海运运价剧变等高影响资讯，\
-summary 写 3-4 句（必须包含关键数字、生效时间、对卖家的影响）；normal＝一般资讯，summary 写 1-2 句
+- importance 取 "high" 或 "normal"，默认 normal。high 的门槛很高：仅限卖家当天必须知晓、\
+直接影响其收入/成本/合规的确定性重大变动（平台费用佣金调整、政策生效、关税变化、运价剧烈波动），\
+每批最多标 1-2 条 high，行业观察/数据报告/公司动态一律 normal，拿不准就 normal
+- high 的 summary 写 3-4 句（必须包含关键数字、生效时间、对卖家的影响）；normal 的 summary 写 1-2 句
 - summary 用中文，直接陈述事实，不写"本文""文章称"
 - 正文标注"（无正文，仅标题）"的条目按标题判断，summary 留空字符串
 
@@ -95,13 +97,18 @@ REDUCE_PROMPT = """下面是今日跨境电商/国际物流资讯各篇的总结
 {entries}"""
 
 
+def _sort_high_first(result):
+    """组内重点在前（稳定排序，各档内保持原相对顺序）。AI 的排序不可靠，代码兜底。"""
+    return {k: sorted(v, key=lambda it: it.get("importance") != "high") for k, v in result.items()}
+
+
 def group_by_category(items):
     """降级路径：按源配置的 category 归类，不调 AI。"""
     result = {key: [] for key in CATEGORIES}
     for it in items:
         cat = it.get("category") if it.get("category") in CATEGORIES else "market"
         result[cat].append(it)
-    return result
+    return _sort_high_first(result)
 
 
 def group_items(items, token, chat=_chat_json):
@@ -127,6 +134,6 @@ def group_items(items, token, chat=_chat_json):
             if i not in used and i not in drop:
                 cat = it.get("category") if it.get("category") in CATEGORIES else "market"
                 result[cat].append(it)
-        return result
+        return _sort_high_first(result)
     except (AIError, KeyError, TypeError, AttributeError):
         return group_by_category(items)
