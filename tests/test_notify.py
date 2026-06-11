@@ -46,3 +46,60 @@ def test_send_gotify_posts_message(monkeypatch):
     assert url == "https://gotify.example.com/message"
     assert kw["params"]["token"] == "tok"
     assert kw["json"]["priority"] == 8
+
+
+# FIX 1 — oversized single block must be truncated
+def test_telegram_messages_truncates_single_oversized_block():
+    groups = {"platform": [{"url": "https://e.com/1", "title": "题" * 5000,
+                            "summary": "s", "importance": "normal"}]}
+    msgs = notify.telegram_messages(groups, CATS, "2026-06-11", "https://x")
+    assert all(len(m) <= notify.TG_LIMIT for m in msgs)
+
+
+# FIX 2 — token must not appear in exception message
+import pytest
+
+
+def test_send_telegram_error_does_not_leak_token(monkeypatch):
+    monkeypatch.setenv("TG_BOT_TOKEN", "SECRET-TOKEN-123")
+    monkeypatch.setenv("TG_CHAT_ID", "@chan")
+
+    def fake_post(url, **kw):
+        return type("R", (), {"status_code": 400, "text": '{"ok":false,"description":"Bad Request"}'})()
+
+    monkeypatch.setattr(notify.requests, "post", fake_post)
+    with pytest.raises(RuntimeError) as ei:
+        notify.send_telegram(["msg"])
+    assert "SECRET-TOKEN-123" not in str(ei.value)
+
+
+# FIX 3 — happy path: each chunk is posted once
+def test_send_telegram_posts_each_chunk(monkeypatch):
+    calls = []
+    monkeypatch.setenv("TG_BOT_TOKEN", "tok")
+    monkeypatch.setenv("TG_CHAT_ID", "@chan")
+
+    def fake_post(url, **kw):
+        calls.append((url, kw))
+        return type("R", (), {"status_code": 200, "text": "ok"})()
+
+    monkeypatch.setattr(notify.requests, "post", fake_post)
+    notify.send_telegram(["m1", "m2"])
+    assert len(calls) == 2
+    assert "sendMessage" in calls[0][0]
+    assert calls[0][1]["json"]["disable_web_page_preview"] is True
+    assert calls[0][1]["json"]["chat_id"] == "@chan"
+
+
+# FIX 4 — gotify failure warn includes title
+def test_send_gotify_failure_includes_title(monkeypatch, capsys):
+    monkeypatch.setenv("GOTIFY_URL", "https://gotify.example.com/")
+    monkeypatch.setenv("GOTIFY_TOKEN", "tok")
+
+    def fake_post(url, **kw):
+        raise notify.requests.RequestException("connection refused")
+
+    monkeypatch.setattr(notify.requests, "post", fake_post)
+    notify.send_gotify("我的标题", "内容")
+    out = capsys.readouterr().out
+    assert "我的标题" in out

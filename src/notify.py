@@ -20,7 +20,7 @@ def telegram_messages(groups, categories, date_str, site_url):
             if it.get("summary"):
                 text += f"\n{it['summary']}"
             text += f"\n{it['url']}"
-            blocks.append(text)
+            blocks.append(text[:TG_LIMIT - 50])
     blocks.append(f"\n网页版：{site_url}/archive/{date_str}.html")
 
     msgs, cur = [], ""
@@ -47,7 +47,8 @@ def send_telegram(messages):
             json={"chat_id": chat_id, "text": msg, "disable_web_page_preview": True},
             timeout=30,
         )
-        r.raise_for_status()
+        if r.status_code >= 400:
+            raise RuntimeError(f"Telegram sendMessage 失败：HTTP {r.status_code} {r.text[:200]}")
 
 
 def send_gotify(title, message):
@@ -65,4 +66,4 @@ def send_gotify(title, message):
             timeout=20,
         )
     except requests.RequestException as e:
-        print(f"[warn] Gotify 推送失败：{e}")
+        print(f"[warn] Gotify 推送失败（{title!r}）：{e}")
