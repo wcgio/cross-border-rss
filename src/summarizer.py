@@ -45,14 +45,16 @@ def _chat_json(prompt, token, max_tokens=2000):
     raise AIError(str(last))
 
 
-MAP_PROMPT = """你是跨境电商行业资讯编辑。下面有 {n} 篇文章（编号、标题、正文节选）。\
-对每篇输出一个 JSON 对象，整体输出格式：
+MAP_PROMPT = """你是资讯编辑，为一位主营 Amazon、eBay、Etsy、面向美国与欧洲市场的跨境电商卖家筛选资讯。\
+下面有 {n} 篇文章（编号、标题、正文节选）。对每篇输出一个 JSON 对象，整体输出格式：
 {"results": [{"id": 1, "relevant": true, "importance": "high", "summary": "..."}]}
 规则：
 - 与跨境电商/外贸/国际物流无关的条目 relevant 设为 false，不写 summary
-- importance 取 "high" 或 "normal"，默认 normal。high 的门槛很高：仅限卖家当天必须知晓、\
-直接影响其收入/成本/合规的确定性重大变动（平台费用佣金调整、政策生效、关税变化、运价剧烈波动），\
-每批最多标 1-2 条 high，行业观察/数据报告/公司动态一律 normal，拿不准就 normal
+- importance 取 "high" 或 "normal"，默认 normal。high 的门槛很高：仅限直接影响 Amazon/eBay/Etsy \
+卖家收入/成本/合规的确定性重大变动（三平台的费用佣金调整、政策生效、账号合规新规），\
+或美欧关税、海运运价、平台监管的重大政策，每批最多标 1-2 条 high
+- 其他平台（Temu、TikTok Shop、沃尔玛、Shein 等）的资讯一律 normal，作为行业背景保留即可
+- 行业观察/数据报告/公司动态一律 normal，拿不准就 normal
 - high 的 summary 写 3-4 句（必须包含关键数字、生效时间、对卖家的影响）；normal 的 summary 写 1-2 句
 - summary 用中文，直接陈述事实，不写"本文""文章称"
 - 正文标注"（无正文，仅标题）"的条目按标题判断，summary 留空字符串
@@ -90,6 +92,7 @@ REDUCE_PROMPT = """下面是今日跨境电商/国际物流资讯各篇的总结
 {"groups": {"platform": [编号...], "logistics": [...], "compliance": [...], "market": [...]}, "merged": [[编号,编号], ...]}
 规则：
 - 把每个编号分到且只分到一组：platform=平台政策, logistics=国际物流, compliance=关税合规, market=大盘趋势
+- platform 组只收 Amazon/eBay/Etsy 及行业通用的平台政策；其他平台（Temu、TikTok Shop、沃尔玛、Shein 等）的动态归 market
 - 每组内按重要性从高到低排列
 - 报道同一事件的多篇放入 merged（信息最全的编号放在最前，后面的会被合并丢弃）
 

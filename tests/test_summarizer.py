@@ -98,3 +98,14 @@ def test_groups_put_high_importance_first():
 
     groups = summarizer.group_items(items, "tok", chat=fake_chat)
     assert [it["url"] for it in groups["platform"]] == ["u2", "u4", "u1", "u3"]  # AI 排序不可靠，代码强制重点在前
+
+
+def test_map_prompt_focuses_on_user_platforms():
+    for kw in ("Amazon", "eBay", "Etsy", "美国与欧洲"):
+        assert kw in summarizer.MAP_PROMPT
+    assert "Temu" in summarizer.MAP_PROMPT          # 无关平台显式降级
+    assert "一律 normal" in summarizer.MAP_PROMPT
+
+
+def test_reduce_prompt_routes_other_platforms_to_market():
+    assert "归 market" in summarizer.REDUCE_PROMPT
