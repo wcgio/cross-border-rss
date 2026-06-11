@@ -39,3 +39,14 @@ def test_update_seen_drops_malformed_dates():
     out = filters.update_seen(seen, [], today, keep_days=7)
     assert "bad" not in out
     assert out["kept"] == "2026-06-08"
+
+
+def test_within_window_drops_old_keeps_recent_and_unknown():
+    now = dt.datetime(2026, 6, 11, 12, 0, tzinfo=dt.timezone(dt.timedelta(hours=8)))
+    items = [
+        {"url": "old", "title": "旧闻标题", "pub": now - dt.timedelta(hours=30)},
+        {"url": "new", "title": "新闻标题", "pub": now - dt.timedelta(hours=3)},
+        {"url": "unknown", "title": "无时间标题", "pub": None},
+    ]
+    out = filters.within_window(items, now, hours=24)
+    assert [it["url"] for it in out] == ["new", "unknown"]

@@ -22,6 +22,7 @@ def test_run_produces_outputs(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline, "SOURCES", str(tmp_path / "sources.yml"))
     monkeypatch.setattr(pipeline, "SEEN_FILE", str(tmp_path / "data" / "seen.json"))
     monkeypatch.setattr(pipeline, "DOCS", str(tmp_path / "docs"))
+    monkeypatch.setattr(pipeline, "LOOKBACK_HOURS", 10**6)  # fixture 日期固定，测试不验证时间窗
 
     xml = (FIXTURES / "sample_rss.xml").read_text(encoding="utf-8")
     monkeypatch.setattr(pipeline.fetcher, "fetch_url", lambda url, encoding=None: xml)
@@ -61,6 +62,7 @@ def test_run_records_source_errors(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline, "SOURCES", str(tmp_path / "sources.yml"))
     monkeypatch.setattr(pipeline, "SEEN_FILE", str(tmp_path / "data" / "seen.json"))
     monkeypatch.setattr(pipeline, "DOCS", str(tmp_path / "docs"))
+    monkeypatch.setattr(pipeline, "LOOKBACK_HOURS", 10**6)  # fixture 日期固定，测试不验证时间窗
 
     def boom(url, encoding=None):
         raise OSError("connection refused")
@@ -102,6 +104,7 @@ def test_run_partial_source_failure_no_abnormal_title(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline, "SOURCES", str(tmp_path / "sources.yml"))
     monkeypatch.setattr(pipeline, "SEEN_FILE", str(tmp_path / "data" / "seen.json"))
     monkeypatch.setattr(pipeline, "DOCS", str(tmp_path / "docs"))
+    monkeypatch.setattr(pipeline, "LOOKBACK_HOURS", 10**6)  # fixture 日期固定，测试不验证时间窗
     xml = (FIXTURES / "sample_rss.xml").read_text(encoding="utf-8")
 
     def fetch(url, encoding=None):
@@ -135,6 +138,7 @@ def test_run_ai_batch_failure_falls_back_to_titles(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline, "SOURCES", str(tmp_path / "sources.yml"))
     monkeypatch.setattr(pipeline, "SEEN_FILE", str(tmp_path / "data" / "seen.json"))
     monkeypatch.setattr(pipeline, "DOCS", str(tmp_path / "docs"))
+    monkeypatch.setattr(pipeline, "LOOKBACK_HOURS", 10**6)  # fixture 日期固定，测试不验证时间窗
     xml = (FIXTURES / "sample_rss.xml").read_text(encoding="utf-8")
     monkeypatch.setattr(pipeline.fetcher, "fetch_url", lambda url, encoding=None: xml)
     monkeypatch.setattr(pipeline.extractor, "extract_text", lambda it, **kw: {**it, "text": ""})

@@ -22,6 +22,7 @@ SOURCES = os.path.join(ROOT, "sources.yml")
 SEEN_FILE = os.path.join(ROOT, "data", "seen.json")
 DOCS = os.path.join(ROOT, "docs")
 SITE_URL = os.environ.get("SITE_URL", "https://rss.cgio.qzz.io")
+LOOKBACK_HOURS = int(os.environ.get("LOOKBACK_HOURS", "24"))
 TZ8 = dt.timezone(dt.timedelta(hours=8))
 
 
@@ -34,7 +35,8 @@ def load_seen():
 
 
 def run():
-    today = dt.datetime.now(TZ8).date()
+    now = dt.datetime.now(TZ8)
+    today = now.date()
     date_str = today.isoformat()
     with open(SOURCES, encoding="utf-8") as f:
         sources = yaml.safe_load(f)["sources"]
@@ -50,6 +52,7 @@ def run():
             source_errors.append((cfg["name"], f"{type(e).__name__}: {e}"))
             print(f"[fail] {cfg['name']}: {e}")
 
+    items = filters.within_window(items, now, hours=LOOKBACK_HOURS)
     seen = load_seen()
     fresh = filters.dedup_unseen(items, seen)
     uniq, urls = [], set()

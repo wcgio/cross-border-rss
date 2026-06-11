@@ -17,6 +17,12 @@ def keyword_filter(items, include=None, exclude=None):
     return out
 
 
+def within_window(items, now, hours=24):
+    """只保留近 hours 小时内发布的条目；无发布时间的保留（由 seen 去重兜底）。"""
+    cutoff = now - dt.timedelta(hours=hours)
+    return [it for it in items if it.get("pub") is None or it["pub"] >= cutoff]
+
+
 def dedup_unseen(items, seen):
     """seen: {url: 'YYYY-MM-DD'}，返回未见过的条目。"""
     return [it for it in items if it["url"] not in seen]

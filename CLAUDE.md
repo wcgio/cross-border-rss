@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-零服务器的跨境电商/国际物流资讯日报管道，GitHub Actions 每天 UTC 23:00（北京时间 07:00）运行：
+零服务器的跨境电商/国际物流资讯日报管道，GitHub Actions 每天 UTC 04:00（北京时间 12:00）运行，只收录近 24h（`LOOKBACK_HOURS`）发布的资讯：
 
 ```
 sources.yml → fetcher（抓源）→ filters（关键词过滤 + seen.json 跨天去重）
