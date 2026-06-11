@@ -31,7 +31,18 @@ sources:
     category: platform
     exclude: ["招聘", "广告", "直播预告"]
 
+  - name: "ChannelX（欧洲电商/eBay）"
+    type: rss
+    url: "https://channelx.world/feed/"
+    category: platform
+
+  - name: "Value Added Resource（eBay/Etsy）"
+    type: rss
+    url: "https://www.valueaddedresource.net/rss/"
+    category: platform
+
   # 预留：卖家通知邮件转 RSS（Kill the Newsletter 生成后取消注释填入）
+  # Amazon/eBay/Etsy 三平台的卖家通知邮件均可各转一个源
   # - name: "Amazon 卖家通知"
   #   type: rss
   #   url: "https://kill-the-newsletter.com/feeds/XXXX.xml"
@@ -85,5 +96,5 @@ sources:
   - name: "36氪"
     type: rss
     url: "https://36kr.com/feed"
-    include: ["跨境", "出海", "亚马逊", "Temu", "TikTok", "Shein", "关税", "物流", "海运"]
+    include: ["跨境", "出海", "亚马逊", "eBay", "Etsy", "欧盟", "VAT", "Temu", "TikTok", "Shein", "关税", "物流", "海运"]
     category: market
