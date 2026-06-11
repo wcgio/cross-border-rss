@@ -11,8 +11,11 @@ body { max-width: 720px; margin: 0 auto; padding: 16px;
 h1 { font-size: 1.4em; }
 h2 { font-size: 1.15em; border-bottom: 1px solid #8884; padding-bottom: 4px; }
 h3 { font-size: 1em; margin: 0 0 4px; }
-article { margin: 14px 0; padding-left: 10px; border-left: 3px solid #8883; }
-article.high { border-left-color: #e0a000; }
+article { margin: 12px 0; padding: 12px 14px; border: 1px solid #8883;
+  border-radius: 10px; background: rgba(136, 136, 136, .07); }
+article.high { border-left: 3px solid #e0a000; }
+article p:last-child { margin-bottom: 0; }
+article h3 { margin-top: 0; }
 .meta { color: #888; font-size: .85em; margin: 2px 0; }
 a { color: inherit; }
 .tabs > input { display: none; }
