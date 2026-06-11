@@ -25,6 +25,23 @@ article {{ margin: 14px 0; padding-left: 10px; border-left: 3px solid #8883; }}
 article.high {{ border-left-color: #e0a000; }}
 .meta {{ color: #888; font-size: .85em; margin: 2px 0; }}
 a {{ color: inherit; }}
+.tabs > input {{ display: none; }}
+.tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
+  border-bottom: 1px solid #8884; position: sticky; top: 0;
+  background: Canvas; padding-top: 4px; }}
+.tab-bar label {{ padding: 6px 12px; cursor: pointer; color: #888;
+  border-bottom: 2px solid transparent; font-size: .95em; user-select: none; }}
+.tab-bar .count {{ font-size: .8em; opacity: .7; }}
+.tabs .panel {{ display: none; }}
+#tab-platform:checked ~ .tab-bar label[for="tab-platform"],
+#tab-logistics:checked ~ .tab-bar label[for="tab-logistics"],
+#tab-compliance:checked ~ .tab-bar label[for="tab-compliance"],
+#tab-market:checked ~ .tab-bar label[for="tab-market"] {{
+  color: inherit; font-weight: 600; border-bottom-color: #e0a000; }}
+#tab-platform:checked ~ #panel-platform,
+#tab-logistics:checked ~ #panel-logistics,
+#tab-compliance:checked ~ #panel-compliance,
+#tab-market:checked ~ #panel-market {{ display: block; }}
 </style>
 </head>
 <body>
@@ -36,24 +53,56 @@ a {{ color: inherit; }}
 """
 
 
+def _render_article(it):
+    cls = "high" if it.get("importance") == "high" else "normal"
+    url = it["url"] if it["url"].startswith(("https://", "http://")) else "#"
+    summary = (
+        f"<p>{html.escape(it['summary'])}</p>"
+        if it.get("summary")
+        else '<p class="meta">（仅标题，未能获取正文）</p>'
+    )
+    return (
+        f'<article class="{cls}"><h3>{html.escape(it["title"])}</h3>'
+        f'<p class="meta">{html.escape(it.get("source") or "")}</p>'
+        f"{summary}"
+        f'<p class="meta"><a href="{html.escape(url)}">原文 ↗</a></p></article>'
+    )
+
+
 def render_groups_html(groups):
+    """线性分节版（RSS 阅读器用：不能依赖 CSS 交互）。"""
     parts = []
     for key, label in CATEGORIES.items():
         items = groups.get(key) or []
         if not items:
             continue
         parts.append(f"<section><h2>{label}</h2>")
-        for it in items:
-            cls = "high" if it.get("importance") == "high" else "normal"
-            parts.append(f'<article class="{cls}"><h3>{html.escape(it["title"])}</h3>')
-            parts.append(f'<p class="meta">{html.escape(it.get("source") or "")}</p>')
-            if it.get("summary"):
-                parts.append(f"<p>{html.escape(it['summary'])}</p>")
-            else:
-                parts.append('<p class="meta">（仅标题，未能获取正文）</p>')
-            url = it["url"] if it["url"].startswith(("https://", "http://")) else "#"
-            parts.append(f'<p class="meta"><a href="{html.escape(url)}">原文 ↗</a></p></article>')
+        parts.extend(_render_article(it) for it in items)
         parts.append("</section>")
+    return "".join(parts)
+
+
+def render_groups_tabbed(groups):
+    """网页版：四主题 Tab 切换（纯 CSS radio 实现，零 JS）。空分类不出 Tab。"""
+    keys = [k for k in CATEGORIES if groups.get(k)]
+    if not keys:
+        return ""
+    parts = ['<div class="tabs">']
+    for i, key in enumerate(keys):
+        checked = " checked" if i == 0 else ""
+        parts.append(f'<input type="radio" name="tab" id="tab-{key}"{checked}>')
+    parts.append('<nav class="tab-bar">')
+    for key in keys:
+        parts.append(
+            f'<label for="tab-{key}">{CATEGORIES[key]} '
+            f'<span class="count">{len(groups[key])}</span></label>'
+        )
+    parts.append("</nav>")
+    for key in keys:
+        parts.append(f'<section class="panel" id="panel-{key}">')
+        parts.extend(_render_article(it) for it in groups[key])
+        parts.append("</section>")
+    parts.append("</div>")
     return "".join(parts)
 
 

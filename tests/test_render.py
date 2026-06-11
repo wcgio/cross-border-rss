@@ -64,3 +64,19 @@ def test_render_page_escapes_title():
 def test_render_index_custom_title():
     page = render.render_index("2026-06-11", "", [], title="自定义标题X")
     assert "自定义标题X" in page
+
+
+def test_render_groups_tabbed_structure():
+    body = render.render_groups_tabbed(GROUPS)
+    assert body.count('type="radio"') == 2                # 只为非空分类生成 Tab
+    assert 'id="tab-platform" checked' in body            # 第一个非空分类默认选中
+    assert 'id="tab-logistics" checked' not in body
+    assert '<label for="tab-platform">平台政策 <span class="count">1</span></label>' in body
+    assert 'id="panel-platform"' in body
+    assert "重大政策&lt;标题&gt;" in body                  # 条目渲染与转义复用
+    assert "仅标题" in body
+
+
+def test_render_groups_tabbed_empty():
+    assert render.render_groups_tabbed({}) == ""
+    assert render.render_groups_tabbed({"platform": []}) == ""

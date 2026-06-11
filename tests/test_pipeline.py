@@ -43,6 +43,10 @@ def test_run_produces_outputs(tmp_path, monkeypatch):
     seen = json.loads((tmp_path / "data" / "seen.json").read_text(encoding="utf-8"))
     assert "https://example.com/a1" in seen
     assert sent and "Ocean freight rates jump 20%" in sent[0]
+    index = (tmp_path / "docs" / "index.html").read_text(encoding="utf-8")
+    assert 'class="tab-bar"' in index                       # 网页是 Tab 版
+    xml = (tmp_path / "docs" / "digest.xml").read_bytes()
+    assert b"tab-bar" not in xml and b"<h2>" in xml          # RSS 保持线性分节
 
 
 def test_run_records_source_errors(tmp_path, monkeypatch):

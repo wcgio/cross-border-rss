@@ -73,25 +73,28 @@ def run():
     groups = group_items(summarized, token) if summarized else {}
     count = sum(len(v) for v in groups.values())
 
-    body = render.render_groups_html(groups)
+    body_rss = render.render_groups_html(groups)   # RSS 阅读器：线性分节
+    body_web = render.render_groups_tabbed(groups)  # 网页：纯 CSS Tab
     if not summarized:
-        body = "<p>过去24小时没有新资讯。</p>" + body
+        notice = "<p>过去24小时没有新资讯。</p>"
+        body_rss = notice + body_rss
+        body_web = notice + body_web
     title = f"跨境/物流日报 {date_str}" + (f"（{count} 条）" if count else "（无新内容）")
     if not items and source_errors:
         title += "【今日抓取异常】"
 
     os.makedirs(os.path.join(DOCS, "archive"), exist_ok=True)
     with open(os.path.join(DOCS, "archive", f"{date_str}.html"), "w", encoding="utf-8") as f:
-        f.write(render.render_page(title, body))
+        f.write(render.render_page(title, body_web))
     archive_dates = sorted(
         (n[:-5] for n in os.listdir(os.path.join(DOCS, "archive"))
          if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", n)),
         reverse=True,
     )
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
-        f.write(render.render_index(date_str, body, archive_dates, title=title))
+        f.write(render.render_index(date_str, body_web, archive_dates, title=title))
     with open(os.path.join(DOCS, "digest.xml"), "wb") as f:
-        f.write(render.render_rss(date_str, body, count, SITE_URL))
+        f.write(render.render_rss(date_str, body_rss, count, SITE_URL))
 
     os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
     with open(SEEN_FILE, "w", encoding="utf-8") as f:
