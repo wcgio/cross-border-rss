@@ -1,6 +1,7 @@
 """渲染 digest.xml 与 HTML 页面。纯函数：分组数据 → 字符串/字节。"""
 import datetime as dt
 import html
+from collections import Counter
 
 from feedgen.feed import FeedGenerator
 
@@ -29,6 +30,9 @@ article h3 {{ margin-top: 0; }}
 .meta {{ color: #888; font-size: .85em; margin: 2px 0; }}
 .badge {{ background: #e0a000; color: #fff; font-size: .72em; font-weight: 600;
   padding: 1px 6px; border-radius: 4px; margin-right: 6px; vertical-align: 2px; }}
+.sources {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0;
+  font-size: .82em; color: #888; }}
+.sources .chip {{ border: 1px solid #8884; border-radius: 999px; padding: 1px 9px; }}
 a {{ color: inherit; }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
@@ -94,7 +98,11 @@ def render_groups_tabbed(groups):
     keys = [k for k in CATEGORIES if groups.get(k)]
     if not keys:
         return ""
-    parts = ['<div class="tabs">']
+    counts = Counter(it.get("source") or "未知来源" for k in keys for it in groups[k])
+    chips = "".join(
+        f'<span class="chip">{html.escape(s)} {n}</span>' for s, n in counts.most_common()
+    )
+    parts = [f'<div class="sources">{chips}</div>', '<div class="tabs">']
     for i, key in enumerate(keys):
         checked = " checked" if i == 0 else ""
         parts.append(f'<input type="radio" name="tab" id="tab-{key}"{checked}>')

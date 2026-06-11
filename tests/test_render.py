@@ -86,3 +86,20 @@ def test_high_importance_article_gets_badge():
     body = render.render_groups_html(GROUPS)
     assert '<span class="badge">重点</span>' in body
     assert body.count('<span class="badge">') == 1   # 普通条目没有角标
+
+
+def test_render_groups_tabbed_source_bar_counts_and_order():
+    groups = {
+        "platform": [
+            {"url": "https://e/1", "title": "标题一", "summary": "s", "importance": "normal", "source": "甲"},
+            {"url": "https://e/2", "title": "标题二", "summary": "s", "importance": "normal", "source": "乙"},
+        ],
+        "logistics": [
+            {"url": "https://e/3", "title": "标题三", "summary": "s", "importance": "normal", "source": "乙"},
+        ],
+    }
+    body = render.render_groups_tabbed(groups)
+    assert '<span class="chip">乙 2</span>' in body
+    assert '<span class="chip">甲 1</span>' in body
+    assert body.index("乙 2") < body.index("甲 1")              # 按条数降序
+    assert body.index('class="sources"') < body.index('type="radio"')  # 位于 Tab 上方
