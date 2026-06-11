@@ -67,11 +67,12 @@ def render_page(title, body_html, footer=""):
     return PAGE_TMPL.format(title=html.escape(title), body=body_html, footer=footer)
 
 
-def render_index(date_str, body_html, archive_dates):
+def render_index(date_str, body_html, archive_dates, title=None):
     links = " · ".join(f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in archive_dates)
     body = body_html + f"<section><h2>历史归档</h2><p>{links}</p></section>"
+    page_title = title if title is not None else f"跨境/物流日报 {date_str}"
     return render_page(
-        f"跨境/物流日报 {date_str}", body,
+        page_title, body,
         footer='RSS 订阅：<a href="digest.xml">digest.xml</a>',
     )
 
