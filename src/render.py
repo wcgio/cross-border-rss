@@ -51,7 +51,8 @@ def render_groups_html(groups, source_errors=()):
                 parts.append(f"<p>{html.escape(it['summary'])}</p>")
             else:
                 parts.append('<p class="meta">（仅标题，未能获取正文）</p>')
-            parts.append(f'<p class="meta"><a href="{html.escape(it["url"])}">原文 ↗</a></p></article>')
+            url = it["url"] if it["url"].startswith(("https://", "http://")) else "#"
+            parts.append(f'<p class="meta"><a href="{html.escape(url)}">原文 ↗</a></p></article>')
         parts.append("</section>")
     if source_errors:
         parts.append("<section><h2>源异常</h2><ul>")
@@ -62,11 +63,12 @@ def render_groups_html(groups, source_errors=()):
 
 
 def render_page(title, body_html, footer=""):
+    """组装整页。title 会被转义；body_html 与 footer 必须是调用方构建的可信 HTML。"""
     return PAGE_TMPL.format(title=html.escape(title), body=body_html, footer=footer)
 
 
 def render_index(date_str, body_html, archive_dates):
-    links = " · ".join(f'<a href="archive/{d}.html">{d}</a>' for d in archive_dates)
+    links = " · ".join(f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in archive_dates)
     body = body_html + f"<section><h2>历史归档</h2><p>{links}</p></section>"
     return render_page(
         f"跨境/物流日报 {date_str}", body,

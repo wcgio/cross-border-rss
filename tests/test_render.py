@@ -38,3 +38,25 @@ def test_render_rss_one_entry_per_day():
     assert b"digest-2026-06-11" in xml
     assert "跨境/物流日报 2026-06-11（5 条）".encode() in xml
     assert b"rss.cgio.qzz.io/archive/2026-06-11.html" in xml
+
+
+def test_render_index_escapes_archive_dates():
+    page = render.render_index("2026-06-11", "", ["<script>x</script>"])
+    assert "<script>x</script>" not in page
+
+
+def test_render_groups_html_blocks_javascript_urls():
+    groups = {"platform": [{"url": "javascript:alert(1)", "title": "标题足够长条目",
+                            "summary": "s", "importance": "normal", "source": "S"}]}
+    body = render.render_groups_html(groups)
+    assert "javascript:" not in body
+
+
+def test_render_rss_zero_items_suffix():
+    xml = render.render_rss("2026-06-11", "<p>B</p>", 0, "https://x")
+    assert "（无新内容）".encode() in xml
+
+
+def test_render_page_escapes_title():
+    page = render.render_page("A<B>C", "")
+    assert "A&lt;B&gt;C" in page
