@@ -99,7 +99,7 @@ def test_render_groups_tabbed_source_bar_counts_and_order():
         ],
     }
     body = render.render_groups_tabbed(groups)
-    assert '<span class="chip c0">乙 <b>2</b></span>' in body   # 色系按排名轮换
-    assert '<span class="chip c1">甲 <b>1</b></span>' in body   # 数字加粗
+    assert '<span class="chip">乙 <b>2</b></span>' in body      # 数字加粗
+    assert '<span class="chip">甲 <b>1</b></span>' in body
     assert body.index("乙 <b>2</b>") < body.index("甲 <b>1</b>")        # 按条数降序
     assert body.index('class="sources"') < body.index('type="radio"')  # 位于 Tab 上方

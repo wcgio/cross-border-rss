@@ -24,20 +24,16 @@ h2 {{ font-size: 1.15em; border-bottom: 1px solid #8884; padding-bottom: 4px; }}
 h3 {{ font-size: 1em; margin: 0 0 4px; }}
 article {{ margin: 12px 0; padding: 12px 14px; border: 1px solid #8883;
   border-radius: 10px; background: rgba(136, 136, 136, .07); }}
-article.high {{ border-left: 3px solid #e0a000; }}
+article.high {{ border-left: 3px solid #e64545; }}
 article p:last-child {{ margin-bottom: 0; }}
 article h3 {{ margin-top: 0; }}
 .meta {{ color: #888; font-size: .85em; margin: 2px 0; }}
-.badge {{ background: #e0a000; color: #fff; font-size: .72em; font-weight: 600;
+.badge {{ background: #e64545; color: #fff; font-size: .72em; font-weight: 600;
   padding: 1px 6px; border-radius: 4px; margin-right: 6px; vertical-align: 2px; }}
 .sources {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; font-size: .82em; }}
-.sources .chip {{ border: 1px solid; border-radius: 6px; padding: 2px 9px; }}
+.sources .chip {{ color: #409eff; background: rgba(64, 158, 255, .12);
+  border: 1px solid rgba(64, 158, 255, .35); border-radius: 6px; padding: 2px 9px; }}
 .sources .chip b {{ color: CanvasText; font-weight: 700; margin-left: 2px; }}
-.chip.c0 {{ color: #409eff; background: rgba(64, 158, 255, .12); border-color: rgba(64, 158, 255, .35); }}
-.chip.c1 {{ color: #67c23a; background: rgba(103, 194, 58, .12); border-color: rgba(103, 194, 58, .35); }}
-.chip.c2 {{ color: #e6a23c; background: rgba(230, 162, 60, .12); border-color: rgba(230, 162, 60, .35); }}
-.chip.c3 {{ color: #f56c6c; background: rgba(245, 108, 108, .12); border-color: rgba(245, 108, 108, .35); }}
-.chip.c4 {{ color: #909399; background: rgba(144, 147, 153, .12); border-color: rgba(144, 147, 153, .35); }}
 a {{ color: inherit; }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
@@ -105,8 +101,8 @@ def render_groups_tabbed(groups):
         return ""
     counts = Counter(it.get("source") or "未知来源" for k in keys for it in groups[k])
     chips = "".join(
-        f'<span class="chip c{i % 5}">{html.escape(s)} <b>{n}</b></span>'
-        for i, (s, n) in enumerate(counts.most_common())
+        f'<span class="chip">{html.escape(s)} <b>{n}</b></span>'
+        for s, n in counts.most_common()
     )
     parts = [f'<div class="sources">{chips}</div>', '<div class="tabs">']
     for i, key in enumerate(keys):
