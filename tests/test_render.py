@@ -60,3 +60,8 @@ def test_render_rss_zero_items_suffix():
 def test_render_page_escapes_title():
     page = render.render_page("A<B>C", "")
     assert "A&lt;B&gt;C" in page
+
+
+def test_render_index_custom_title():
+    page = render.render_index("2026-06-11", "", [], title="自定义标题X")
+    assert "自定义标题X" in page

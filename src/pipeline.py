@@ -7,6 +7,7 @@
 import datetime as dt
 import json
 import os
+import re
 import sys
 import traceback
 
@@ -83,7 +84,8 @@ def run():
     with open(os.path.join(DOCS, "archive", f"{date_str}.html"), "w", encoding="utf-8") as f:
         f.write(render.render_page(title, body))
     archive_dates = sorted(
-        (n[:-5] for n in os.listdir(os.path.join(DOCS, "archive")) if n.endswith(".html")),
+        (n[:-5] for n in os.listdir(os.path.join(DOCS, "archive"))
+         if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", n)),
         reverse=True,
     )
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
