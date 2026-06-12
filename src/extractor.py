@@ -1,6 +1,7 @@
 """为条目补充正文 text。降级链：feed 自带内容 → trafilatura 抓页面提取 → 空（仅标题）。"""
 import html as html_lib
 import re
+from urllib.parse import urlparse
 
 import trafilatura
 
@@ -8,6 +9,12 @@ from .fetcher import fetch_url
 
 MIN_FEED_CONTENT = 200  # feed 内容达到此长度即不再抓页面
 MAX_TEXT = 2000         # 控制 AI token 用量
+NO_FETCH_HOSTS = ("youtube.com", "youtu.be")  # 纯 JS 页面提不出正文，只会引入模板杂质
+
+
+def _skip_page_fetch(url):
+    host = urlparse(url).netloc.lower()
+    return any(host == h or host.endswith("." + h) for h in NO_FETCH_HOSTS)
 
 
 def strip_html(s):
@@ -18,7 +25,7 @@ def strip_html(s):
 
 def extract_text(item, fetch=fetch_url):
     plain = strip_html(item.get("feed_content"))
-    if len(plain) >= MIN_FEED_CONTENT:
+    if len(plain) >= MIN_FEED_CONTENT or _skip_page_fetch(item["url"]):
         item["text"] = plain[:MAX_TEXT]
         return item
     try:

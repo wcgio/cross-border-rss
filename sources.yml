@@ -41,6 +41,19 @@ sources:
     url: "https://www.valueaddedresource.net/rss/"
     category: platform
 
+  # YouTube 源：官方 channel feed，无需 API key；正文取视频简介（extractor 对 YouTube 域名跳过页面抓取）
+  - name: "My Amazon Guy（YouTube）"
+    type: rss
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UClUSEsDS2sdgNJfCcCM_5Uw"
+    category: platform
+    exclude: ["#shorts", "#short"]
+
+  - name: "ChannelX 视频（YouTube）"
+    type: rss
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCLsYhZ7wvUeHwKV-6rnlH_A"
+    category: platform
+    exclude: ["#shorts", "#short"]
+
   # 预留：卖家通知邮件转 RSS（Kill the Newsletter 生成后取消注释填入）
   # Amazon/eBay/Etsy 三平台的卖家通知邮件均可各转一个源
   # - name: "Amazon 卖家通知"

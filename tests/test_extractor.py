@@ -38,6 +38,31 @@ def test_truncates_to_max():
     assert len(out["text"]) == extractor.MAX_TEXT
 
 
+def spy(calls):
+    def _f(url):
+        calls.append(url)
+        return "<html>页面杂质</html>"
+    return _f
+
+
+def test_youtube_skips_page_fetch_uses_description(monkeypatch):
+    monkeypatch.setattr(extractor.trafilatura, "extract", lambda html: "页面杂质" * 60)
+    calls = []
+    item = {"url": "https://www.youtube.com/watch?v=abc", "title": "t", "feed_content": "短简介"}
+    out = extractor.extract_text(item, fetch=spy(calls))
+    assert calls == []
+    assert out["text"] == "短简介"
+
+
+def test_youtu_be_skips_page_fetch_even_without_description(monkeypatch):
+    monkeypatch.setattr(extractor.trafilatura, "extract", lambda html: "页面杂质" * 60)
+    calls = []
+    item = {"url": "https://youtu.be/abc", "title": "t", "feed_content": ""}
+    out = extractor.extract_text(item, fetch=spy(calls))
+    assert calls == []
+    assert out["text"] == ""
+
+
 def test_strip_html_decodes_entities():
     assert extractor.strip_html("&lt;p&gt;A &amp; B&lt;/p&gt;") == "A & B"
 

@@ -31,6 +31,7 @@ python -m src.pipeline                     # 本地跑管道（需 GITHUB_TOKEN�
 - **降级保日报**：单源失败记「源异常」小节；单篇正文失败退回 feed 摘要再退回仅标题；AI map 失败该批退回标题、reduce 失败按源 category 归类——任何故障都不应阻止日报生成，改动时维持这一不变量
 - **`data/seen.json` 是跨天去重状态**，由 workflow commit 维护；删除它会导致次日日报重复
 - **scrape 源用 URL 正则提链接**（抗改版，不依赖 CSS class），新增源只改 `sources.yml` 不改代码
+- **YouTube 源走官方 channel feed**（`youtube.com/feeds/videos.xml?channel_id=UC…`，无需 API key），正文用视频简介；extractor 对 YouTube 域名跳过页面抓取（纯 JS 页提不出正文，只会引入模板杂质）。字幕转写方案已评估并否决：YouTube 封锁数据中心 IP，与零服务器设计相悖
 - **时区硬编码北京时间**（`TZ8 = UTC+8`），日报按日 guid 去重，每天恰好一条 RSS entry
 - summarizer 的 prompt 模板含 JSON 大括号，用 `.replace()` 填充而非 `.format()`
 - 未知 category 一律归入 market（summarizer 两处显式成员检查），防止条目被渲染层静默丢弃
