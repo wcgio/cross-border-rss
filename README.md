@@ -1,6 +1,6 @@
 # cross-border-rss
 
-零服务器的跨境电商 / 国际物流资讯日报。GitHub Actions 每天北京时间 12:00 运行，只收录近 24 小时发布的资讯：
+零服务器的跨境电商 / 国际物流资讯日报。GitHub Actions 每天北京时间 12:17 运行，只收录近 24 小时发布的资讯：
 抓取各源 → 过滤去重 → 正文提取 → AI 分级总结（GitHub Models，免费）→ 发布到
 Cloudflare Pages → Telegram 推送。崩溃时 Gotify 通知。
 
@@ -11,7 +11,7 @@ Cloudflare Pages → Telegram 推送。崩溃时 Gotify 通知。
 - 历史归档：https://rss.cgio.qzz.io/archive/YYYY-MM-DD.html
 - Telegram：bot 每天推送到频道
 
-> GitHub 定时任务可能比 12:00 晚数分钟到半小时，属正常现象。
+> GitHub 定时任务可能比 12:17 晚数分钟到半小时，属正常现象。
 
 ## 新增资讯源
 

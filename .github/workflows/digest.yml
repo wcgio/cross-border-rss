@@ -2,7 +2,7 @@ name: daily-digest
 
 on:
   schedule:
-    - cron: "0 4 * * *" # UTC 04:00 = 北京时间 12:00（GitHub cron 可能延迟数分钟到半小时）
+    - cron: "17 4 * * *" # UTC 04:17 = 北京时间 12:17，错开整点高峰（GitHub cron 整点档常被延迟或丢弃）
   workflow_dispatch:
 
 permissions:
