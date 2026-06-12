@@ -1,0 +1,20 @@
+name: probe-youtube
+# 临时探测：验证 YouTube channel feed 从 Actions IP 可达，验证后即删除此文件
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch both youtube feeds with pipeline UA
+        run: |
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          for cid in UClUSEsDS2sdgNJfCcCM_5Uw UCLsYhZ7wvUeHwKV-6rnlH_A; do
+            url="https://www.youtube.com/feeds/videos.xml?channel_id=$cid"
+            code=$(curl -sS -o /tmp/feed.xml -w '%{http_code}' -A "$UA" --max-time 20 "$url")
+            entries=$(grep -c '<entry>' /tmp/feed.xml || true)
+            echo "$cid -> HTTP $code, entries=$entries"
+            test "$code" = "200" && test "$entries" -gt 0
+          done
