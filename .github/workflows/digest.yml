@@ -1,8 +1,8 @@
 name: daily-digest
 
 on:
-  schedule:
-    - cron: "17 4 * * *" # UTC 04:17 = 北京时间 12:17，错开整点高峰（GitHub cron 整点档常被延迟或丢弃）
+  # 不用 GitHub schedule（整点常被延迟/丢弃）。改由 Cloudflare Worker 的 Cron Trigger
+  # 在北京时间 12:00 准点调 workflow_dispatch 触发，见 cron-trigger/。
   workflow_dispatch:
 
 permissions:

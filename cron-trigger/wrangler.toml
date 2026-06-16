@@ -1,0 +1,9 @@
+name = "cross-border-rss-cron"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# 北京时间 12:00 = UTC 04:00（Cloudflare cron 一律按 UTC）
+[triggers]
+crons = ["0 4 * * *"]
+
+# GH_TOKEN 不在此声明，用 `wrangler secret put GH_TOKEN` 或控制台 Settings → Variables 加密存入

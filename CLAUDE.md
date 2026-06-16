@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-零服务器的跨境电商/国际物流资讯日报管道，GitHub Actions 每天 UTC 04:17（北京时间 12:17，错开整点避免 GitHub cron 高峰丢弃）运行，只收录近 24h（`LOOKBACK_HOURS`）发布的资讯：
+零服务器的跨境电商/国际物流资讯日报管道，每天北京时间 12:00 运行（由 Cloudflare Worker 的 Cron Trigger 准点调 GitHub workflow_dispatch 触发，见 `cron-trigger/`；GitHub 自带 schedule 因整点常被延迟/丢弃已弃用），只收录近 24h（`LOOKBACK_HOURS`）发布的资讯：
 
 ```
 sources.yml → fetcher（抓源）→ filters（关键词过滤 + seen.json 跨天去重）
