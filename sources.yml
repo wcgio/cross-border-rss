@@ -50,7 +50,7 @@ sources:
 
   - name: "ChannelX 视频（YouTube）"
     type: rss
-    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCLsYhZ7wvUeHwKV-6rnlH_A"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCupnmND1UIrwTrl8_MMrjiQ"
     category: platform
     exclude: ["#shorts", "#short"]
 
@@ -86,6 +86,16 @@ sources:
   - name: "USTR Press Releases"
     type: rss
     url: "https://ustr.gov/rss.xml"
+    category: compliance
+
+  - name: "Federal Register · 关税"
+    type: rss
+    url: "https://www.federalregister.gov/api/v1/documents.rss?conditions%5Bterms%5D%5B%5D=tariff"
+    category: compliance
+
+  - name: "美国海关 CBP"
+    type: rss
+    url: "https://www.cbp.gov/rss.xml"
     category: compliance
 
   - name: "海关总署 · 新闻发布"
