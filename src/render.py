@@ -21,10 +21,10 @@ PAGE_TMPL = """<!DOCTYPE html>
 body {{ max-width: 720px; margin: 0 auto; padding: 16px;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; }}
 h1 {{ font-size: 1.4em; margin-bottom: 4px; }}
-.topbar {{ display: flex; justify-content: space-between; align-items: baseline;
-  flex-wrap: wrap; gap: 4px 12px; }}
-.topbar .pushed {{ color: #888; font-size: .85em; white-space: nowrap; }}
-.window {{ color: #888; font-size: .85em; margin: 4px 0 14px; }}
+.topbar {{ display: flex; justify-content: flex-end; font-size: 14px; }}
+.window {{ background: rgba(64, 158, 255, .1); border-left: 4px solid #409eff;
+  border-radius: 0 6px 6px 0; padding: 8px 12px; color: #666; font-size: .85em;
+  margin: 6px 0 16px; }}
 h2 {{ font-size: 1.15em; border-bottom: 1px solid #8884; padding-bottom: 4px; }}
 h3 {{ font-size: 1em; margin: 0 0 4px; }}
 article {{ margin: 12px 0; padding: 12px 14px; border: 1px solid #8883;
@@ -139,16 +139,15 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
         f'<span class="subscribe">订阅：<a href="{TG_CHANNEL}">Telegram 频道</a>'
         ' · <a href="digest.xml">RSS</a></span>'
     )
-    pushed, window = "", ""
+    window = ""
     if now is not None:
         fmt = "%Y-%m-%d %H:%M"
         start = now - dt.timedelta(hours=lookback_hours)
-        pushed = f'<span class="pushed">更新于 {now.strftime(fmt)}</span>'
         window = (
             f'<p class="window">本期收录北京时间 {start.strftime(fmt)} 至 '
             f'{now.strftime(fmt)} 发布的资讯；每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
         )
-    topbar = f'<div class="topbar">{subscribe}{pushed}</div>{window}'
+    topbar = f'<div class="topbar">{subscribe}</div>{window}'
 
     links = " · ".join(f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in archive_dates)
     body = topbar + body_html + f"<section><h2>历史归档</h2><p>{links}</p></section>"

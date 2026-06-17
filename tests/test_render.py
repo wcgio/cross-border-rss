@@ -74,16 +74,17 @@ def test_render_index_has_telegram_subscribe_link():
     assert "digest.xml" in page   # RSS 链接仍保留
 
 
-def test_render_index_topbar_pushtime_and_window():
+def test_render_index_topbar_and_window():
     now = dt.datetime(2026, 6, 17, 12, 5, tzinfo=dt.timezone(dt.timedelta(hours=8)))
     page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now, lookback_hours=24)
     assert 'class="topbar"' in page
     # 订阅行在标题与正文之间（即顶部），不在页脚
     assert page.index('class="topbar"') < page.index("<p>B</p>")
-    assert "更新于 2026-06-17 12:05" in page          # 推送时间
+    assert "更新于" not in page                       # 推送时间已移除
+    assert 'href="https://t.me/crossborderdaily"' in page
+    assert 'class="window"' in page                   # 时间段说明
     assert "2026-06-16 12:05" in page                 # 窗口起点 = now - 24h
     assert "至 2026-06-17 12:05" in page              # 窗口终点
-    assert 'href="https://t.me/crossborderdaily"' in page
 
 
 def test_render_groups_tabbed_structure():
