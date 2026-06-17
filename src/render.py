@@ -40,6 +40,8 @@ article h3 {{ margin-top: 0; }}
   border: 1px solid rgba(64, 158, 255, .35); border-radius: 6px; padding: 2px 9px; }}
 .sources .chip b {{ color: CanvasText; font-weight: 700; margin-left: 2px; }}
 a {{ color: inherit; }}
+details {{ margin: 4px 0; }}
+summary {{ cursor: pointer; color: #888; }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
   border-bottom: 1px solid #8884; position: sticky; top: 0;
@@ -149,10 +151,40 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
         )
     topbar = f'<div class="topbar">{subscribe}</div>{window}'
 
-    links = " · ".join(f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in archive_dates)
-    body = topbar + body_html + f"<section><h2>历史归档</h2><p>{links}</p></section>"
+    body = topbar + body_html + render_archive_section(archive_dates)
     page_title = title if title is not None else f"跨境/物流日报 {date_str}"
     return render_page(page_title, body)
+
+
+def render_archive_section(archive_dates):
+    """历史归档：当月日期平铺，更早的按月折叠（纯 CSS <details>，无限扩展不堆叠）。"""
+    if not archive_dates:
+        return ""
+    months = {}  # 'YYYY-MM' -> [dates]，archive_dates 已按新到旧排序
+    order = []
+    for d in archive_dates:
+        ym = d[:7]
+        if ym not in months:
+            months[ym] = []
+            order.append(ym)
+        months[ym].append(d)
+
+    def links(dates):
+        return " · ".join(
+            f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in dates
+        )
+
+    parts = ["<section><h2>历史归档</h2>"]
+    for i, ym in enumerate(order):
+        if i == 0:  # 最近一个月平铺展开
+            parts.append(f"<p>{links(months[ym])}</p>")
+        else:       # 更早每月一个折叠块
+            parts.append(
+                f"<details><summary>{html.escape(ym)}（{len(months[ym])} 篇）</summary>"
+                f"<p>{links(months[ym])}</p></details>"
+            )
+    parts.append("</section>")
+    return "".join(parts)
 
 
 def render_rss(date_str, body_html, item_count, site_url):

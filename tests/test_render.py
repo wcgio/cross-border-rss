@@ -74,6 +74,16 @@ def test_render_index_has_telegram_subscribe_link():
     assert "digest.xml" in page   # RSS 链接仍保留
 
 
+def test_render_index_archive_groups_by_month():
+    dates = ["2026-06-17", "2026-06-16", "2026-05-31", "2026-05-01", "2026-04-30"]
+    page = render.render_index("2026-06-17", "<p>B</p>", dates)
+    assert "<details><summary>2026-06" not in page          # 当月平铺，不折叠
+    assert 'href="archive/2026-06-17.html"' in page
+    assert "<details><summary>2026-05（2 篇）</summary>" in page  # 旧月折叠
+    assert "<details><summary>2026-04（1 篇）</summary>" in page
+    assert 'href="archive/2026-05-01.html"' in page          # 折叠块内链接仍在
+
+
 def test_render_index_topbar_and_window():
     now = dt.datetime(2026, 6, 17, 12, 5, tzinfo=dt.timezone(dt.timedelta(hours=8)))
     page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now, lookback_hours=24)
