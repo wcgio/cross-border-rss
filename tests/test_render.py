@@ -80,7 +80,9 @@ def test_render_index_calendar_embeds_dates_and_today():
     assert 'id="cal"' in page                      # 日历容器
     assert 'TODAY="2026-06-17"' in page            # 今天
     assert '"2026-06-16"' in page                   # 可用日期嵌入
-    assert page.index('id="cal"') < page.index("<p>B</p>")  # 日历在顶部
+    assert 'class="side"' in page                   # 日历在右侧栏
+    assert 'class="main"' in page                   # 正文在主栏
+    assert 'body class="wide"' in page              # 宽屏两栏布局
 
 
 def test_render_index_no_calendar_without_now():

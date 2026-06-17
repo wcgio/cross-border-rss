@@ -21,6 +21,7 @@ PAGE_TMPL = """<!DOCTYPE html>
 :root {{ color-scheme: light dark; }}
 body {{ max-width: 720px; margin: 0 auto; padding: 16px;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; }}
+body.wide {{ max-width: 980px; }}
 h1 {{ font-size: 1.4em; margin-bottom: 4px; }}
 .topbar {{ display: flex; justify-content: flex-end; font-size: 14px; }}
 .window {{ background: rgba(64, 158, 255, .1); border-left: 4px solid #409eff;
@@ -43,7 +44,10 @@ article h3 {{ margin-top: 0; }}
 a {{ color: inherit; }}
 details {{ margin: 4px 0; }}
 summary {{ cursor: pointer; color: #888; }}
-.cal {{ float: right; width: 244px; margin: 0 0 12px 16px; padding: 10px;
+.layout {{ display: flex; gap: 24px; align-items: flex-start; }}
+.main {{ flex: 1; min-width: 0; }}
+.side {{ width: 244px; flex: none; }}
+.cal {{ position: sticky; top: 12px; width: 100%; padding: 10px;
   border: 1px solid #8884; border-radius: 10px; font-size: 13px; box-sizing: border-box; }}
 .cal-hd {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
 .cal-title {{ font-weight: 600; }}
@@ -59,8 +63,12 @@ summary {{ cursor: pointer; color: #888; }}
 .cal-day.off {{ color: #bbb; }}
 .cal-day.today {{ background: #409eff; color: #fff; font-weight: 600; }}
 .cal-empty {{ aspect-ratio: 1; }}
-.sources {{ clear: both; }}
-@media (max-width: 560px) {{ .cal {{ float: none; width: 100%; margin: 0 0 14px; }} }}
+@media (max-width: 760px) {{
+  body.wide {{ max-width: 720px; }}
+  .layout {{ flex-direction: column; }}
+  .side {{ width: 100%; order: -1; }}
+  .cal {{ position: static; }}
+}}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
   border-bottom: 1px solid #8884; position: sticky; top: 0;
@@ -80,7 +88,7 @@ summary {{ cursor: pointer; color: #888; }}
 #tab-market:checked ~ #panel-market {{ display: block; }}
 </style>
 </head>
-<body>
+<body class="{body_class}">
 <h1>{title}</h1>
 {body}
 <footer class="meta"><p>{footer}</p></footer>
@@ -149,9 +157,10 @@ def render_groups_tabbed(groups):
     return "".join(parts)
 
 
-def render_page(title, body_html, footer=""):
+def render_page(title, body_html, footer="", body_class=""):
     """组装整页。title 会被转义；body_html 与 footer 必须是调用方构建的可信 HTML。"""
-    return PAGE_TMPL.format(title=html.escape(title), body=body_html, footer=footer)
+    return PAGE_TMPL.format(title=html.escape(title), body=body_html, footer=footer,
+                           body_class=body_class)
 
 
 # 客户端日历：根据嵌入的可用日期列表渲染当月，今天高亮、有日报的可点、未来/无数据不可点。
@@ -221,11 +230,16 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
             f'{now.strftime(fmt)} 发布的资讯<br>每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
         )
     topbar = f'<div class="topbar">{subscribe}</div>{window}'
-    calendar = render_calendar(archive_dates, now) if now is not None else ""
-
-    body = calendar + topbar + body_html + render_archive_section(archive_dates)
+    main = topbar + body_html + render_archive_section(archive_dates)
     page_title = title if title is not None else f"跨境/物流日报 {date_str}"
-    return render_page(page_title, body)
+
+    if now is None:  # 测试等无时间场景：单栏，无日历
+        return render_page(page_title, main)
+    body = (
+        f'<div class="layout"><div class="main">{main}</div>'
+        f'<aside class="side">{render_calendar(archive_dates, now)}</aside></div>'
+    )
+    return render_page(page_title, body, body_class="wide")
 
 
 def render_archive_section(archive_dates):
