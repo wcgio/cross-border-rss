@@ -46,8 +46,9 @@ details {{ margin: 4px 0; }}
 summary {{ cursor: pointer; color: #888; }}
 .layout {{ display: flex; gap: 24px; align-items: flex-start; }}
 .main {{ flex: 1; min-width: 0; }}
-.side {{ width: 244px; flex: none; }}
-.cal {{ position: sticky; top: 12px; width: 100%; padding: 10px;
+.side {{ width: 244px; flex: none; position: sticky; top: 12px; align-self: flex-start; }}
+.side h2 {{ margin-top: 0; }}
+.cal {{ width: 100%; padding: 10px;
   border: 1px solid #8884; border-radius: 10px; font-size: 13px; box-sizing: border-box; }}
 .cal-hd {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
 .cal-title {{ font-weight: 600; }}
@@ -66,8 +67,8 @@ summary {{ cursor: pointer; color: #888; }}
 @media (max-width: 760px) {{
   body.wide {{ max-width: 720px; }}
   .layout {{ flex-direction: column; }}
-  .side {{ width: 100%; order: -1; }}
-  .cal {{ position: static; max-width: 280px; }}
+  .side {{ width: 100%; position: static; }}
+  .cal {{ max-width: 320px; margin: 0 auto; }}
 }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
@@ -230,47 +231,18 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
             f'{now.strftime(fmt)} 发布的资讯<br>每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
         )
     topbar = f'<div class="topbar">{subscribe}</div>{window}'
-    main = topbar + body_html + render_archive_section(archive_dates)
+    main = topbar + body_html
     page_title = title if title is not None else f"跨境/物流日报 {date_str}"
 
     if now is None:  # 测试等无时间场景：单栏，无日历
         return render_page(page_title, main)
+    # 日历即归档：PC 在右侧栏、移动端落到底部居中
+    side = f'<h2>历史归档</h2>{render_calendar(archive_dates, now)}'
     body = (
         f'<div class="layout"><div class="main">{main}</div>'
-        f'<aside class="side">{render_calendar(archive_dates, now)}</aside></div>'
+        f'<aside class="side">{side}</aside></div>'
     )
     return render_page(page_title, body, body_class="wide")
-
-
-def render_archive_section(archive_dates):
-    """历史归档：当月日期平铺，更早的按月折叠（纯 CSS <details>，无限扩展不堆叠）。"""
-    if not archive_dates:
-        return ""
-    months = {}  # 'YYYY-MM' -> [dates]，archive_dates 已按新到旧排序
-    order = []
-    for d in archive_dates:
-        ym = d[:7]
-        if ym not in months:
-            months[ym] = []
-            order.append(ym)
-        months[ym].append(d)
-
-    def links(dates):
-        return " · ".join(
-            f'<a href="archive/{html.escape(d)}.html">{html.escape(d)}</a>' for d in dates
-        )
-
-    parts = ["<section><h2>历史归档</h2>"]
-    for i, ym in enumerate(order):
-        if i == 0:  # 最近一个月平铺展开
-            parts.append(f"<p>{links(months[ym])}</p>")
-        else:       # 更早每月一个折叠块
-            parts.append(
-                f"<details><summary>{html.escape(ym)}（{len(months[ym])} 篇）</summary>"
-                f"<p>{links(months[ym])}</p></details>"
-            )
-    parts.append("</section>")
-    return "".join(parts)
 
 
 def render_rss(date_str, body_html, item_count, site_url):

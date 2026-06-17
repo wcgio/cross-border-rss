@@ -27,11 +27,10 @@ def test_render_groups_html_skips_empty_sections():
     assert "平台政策" not in body and "大盘趋势" not in body
 
 
-def test_render_index_contains_archive_links():
-    page = render.render_index("2026-06-11", "<p>BODY</p>", ["2026-06-11", "2026-06-10"])
-    assert "archive/2026-06-10.html" in page
-    assert "digest.xml" in page
+def test_render_index_renders_body_and_subscribe():
+    page = render.render_index("2026-06-11", "<p>BODY</p>", ["2026-06-11"])
     assert "<p>BODY</p>" in page
+    assert "digest.xml" in page
 
 
 def test_render_rss_one_entry_per_day():
@@ -39,11 +38,6 @@ def test_render_rss_one_entry_per_day():
     assert b"digest-2026-06-11" in xml
     assert "跨境/物流日报 2026-06-11（5 条）".encode() in xml
     assert b"rss.cgio.qzz.io/archive/2026-06-11.html" in xml
-
-
-def test_render_index_escapes_archive_dates():
-    page = render.render_index("2026-06-11", "", ["<script>x</script>"])
-    assert "<script>x</script>" not in page
 
 
 def test_render_groups_html_blocks_javascript_urls():
@@ -90,14 +84,12 @@ def test_render_index_no_calendar_without_now():
     assert 'id="cal"' not in page                   # 无 now 时不渲染日历
 
 
-def test_render_index_archive_groups_by_month():
-    dates = ["2026-06-17", "2026-06-16", "2026-05-31", "2026-05-01", "2026-04-30"]
-    page = render.render_index("2026-06-17", "<p>B</p>", dates)
-    assert "<details><summary>2026-06" not in page          # 当月平铺，不折叠
-    assert 'href="archive/2026-06-17.html"' in page
-    assert "<details><summary>2026-05（2 篇）</summary>" in page  # 旧月折叠
-    assert "<details><summary>2026-04（1 篇）</summary>" in page
-    assert 'href="archive/2026-05-01.html"' in page          # 折叠块内链接仍在
+def test_render_index_calendar_is_archive_no_text_list():
+    now = dt.datetime(2026, 6, 17, 12, 0, tzinfo=dt.timezone(dt.timedelta(hours=8)))
+    page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17", "2026-05-31"], now=now)
+    assert "<details>" not in page                  # 旧的按天/月文字归档已移除
+    assert page.count("历史归档") == 1               # 仅日历上方一个标题
+    assert 'class="side"' in page and 'id="cal"' in page  # 归档=右侧日历
 
 
 def test_render_index_topbar_and_window():
