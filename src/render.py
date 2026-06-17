@@ -145,7 +145,7 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
         start = now - dt.timedelta(hours=lookback_hours)
         window = (
             f'<p class="window">本期收录北京时间 {start.strftime(fmt)} 至 '
-            f'{now.strftime(fmt)} 发布的资讯；每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
+            f'{now.strftime(fmt)} 发布的资讯<br>每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
         )
     topbar = f'<div class="topbar">{subscribe}</div>{window}'
 
