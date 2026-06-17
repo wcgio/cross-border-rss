@@ -8,6 +8,7 @@ from feedgen.feed import FeedGenerator
 from .summarizer import CATEGORIES
 
 TZ8 = dt.timezone(dt.timedelta(hours=8))
+TG_CHANNEL = "https://t.me/crossborderdaily"  # 公开频道，页脚订阅入口
 
 PAGE_TMPL = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -134,7 +135,7 @@ def render_index(date_str, body_html, archive_dates, title=None):
     page_title = title if title is not None else f"跨境/物流日报 {date_str}"
     return render_page(
         page_title, body,
-        footer='RSS 订阅：<a href="digest.xml">digest.xml</a>',
+        footer=f'订阅：<a href="{TG_CHANNEL}">Telegram 频道</a> · <a href="digest.xml">RSS</a>',
     )
 
 

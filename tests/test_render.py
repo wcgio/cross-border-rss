@@ -66,6 +66,12 @@ def test_render_index_custom_title():
     assert "自定义标题X" in page
 
 
+def test_render_index_has_telegram_subscribe_link():
+    page = render.render_index("2026-06-11", "<p>B</p>", ["2026-06-11"])
+    assert 'href="https://t.me/crossborderdaily"' in page
+    assert "digest.xml" in page   # RSS 链接仍保留
+
+
 def test_render_groups_tabbed_structure():
     body = render.render_groups_tabbed(GROUPS)
     assert body.count('type="radio"') == 2                # 只为非空分类生成 Tab
