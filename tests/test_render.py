@@ -74,6 +74,20 @@ def test_render_index_has_telegram_subscribe_link():
     assert "digest.xml" in page   # RSS 链接仍保留
 
 
+def test_render_index_calendar_embeds_dates_and_today():
+    now = dt.datetime(2026, 6, 17, 12, 0, tzinfo=dt.timezone(dt.timedelta(hours=8)))
+    page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17", "2026-06-16"], now=now)
+    assert 'id="cal"' in page                      # 日历容器
+    assert 'TODAY="2026-06-17"' in page            # 今天
+    assert '"2026-06-16"' in page                   # 可用日期嵌入
+    assert page.index('id="cal"') < page.index("<p>B</p>")  # 日历在顶部
+
+
+def test_render_index_no_calendar_without_now():
+    page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"])
+    assert 'id="cal"' not in page                   # 无 now 时不渲染日历
+
+
 def test_render_index_archive_groups_by_month():
     dates = ["2026-06-17", "2026-06-16", "2026-05-31", "2026-05-01", "2026-04-30"]
     page = render.render_index("2026-06-17", "<p>B</p>", dates)

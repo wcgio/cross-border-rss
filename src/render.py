@@ -1,6 +1,7 @@
 """渲染 digest.xml 与 HTML 页面。纯函数：分组数据 → 字符串/字节。"""
 import datetime as dt
 import html
+import json
 from collections import Counter
 
 from feedgen.feed import FeedGenerator
@@ -42,6 +43,24 @@ article h3 {{ margin-top: 0; }}
 a {{ color: inherit; }}
 details {{ margin: 4px 0; }}
 summary {{ cursor: pointer; color: #888; }}
+.cal {{ float: right; width: 244px; margin: 0 0 12px 16px; padding: 10px;
+  border: 1px solid #8884; border-radius: 10px; font-size: 13px; box-sizing: border-box; }}
+.cal-hd {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }}
+.cal-title {{ font-weight: 600; }}
+.cal-nav button {{ background: none; border: none; color: inherit; cursor: pointer;
+  font-size: 16px; line-height: 1; padding: 0 5px; }}
+.cal-nav button[disabled] {{ opacity: .25; cursor: default; }}
+.cal-grid {{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }}
+.cal-wd {{ color: #888; font-size: 11px; padding: 2px 0; }}
+.cal-day {{ display: flex; align-items: center; justify-content: center; aspect-ratio: 1;
+  border-radius: 50%; text-decoration: none; }}
+.cal-day.on {{ color: #409eff; }}
+.cal-day.on:hover {{ background: rgba(64, 158, 255, .14); }}
+.cal-day.off {{ color: #bbb; }}
+.cal-day.today {{ background: #409eff; color: #fff; font-weight: 600; }}
+.cal-empty {{ aspect-ratio: 1; }}
+.sources {{ clear: both; }}
+@media (max-width: 560px) {{ .cal {{ float: none; width: 100%; margin: 0 0 14px; }} }}
 .tabs > input {{ display: none; }}
 .tab-bar {{ display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
   border-bottom: 1px solid #8884; position: sticky; top: 0;
@@ -135,6 +154,58 @@ def render_page(title, body_html, footer=""):
     return PAGE_TMPL.format(title=html.escape(title), body=body_html, footer=footer)
 
 
+# 客户端日历：根据嵌入的可用日期列表渲染当月，今天高亮、有日报的可点、未来/无数据不可点。
+# ‹ › 翻月：向后到最早有数据的月、向前到当前月为止。纯原生 JS，无外部依赖。
+_CAL_JS = """
+var avail=new Set(DATES);
+var sorted=DATES.slice().sort();
+var minYM=sorted.length?sorted[0].slice(0,7):TODAY.slice(0,7);
+var curYM=TODAY.slice(0,7);
+var tp=TODAY.split("-").map(Number);
+var tY=tp[0],tM=tp[1]-1,tD=tp[2];
+var vY=tY,vM=tM;
+var WD=["日","一","二","三","四","五","六"];
+function p(n){return(n<10?"0":"")+n;}
+function draw(){
+  var ym=vY+"-"+p(vM+1);
+  var startDow=new Date(vY,vM,1).getDay();
+  var days=new Date(vY,vM+1,0).getDate();
+  var canPrev=ym>minYM,canNext=ym<curYM;
+  var h='<div class="cal-hd"><span class="cal-title">'+vY+'年'+(vM+1)+'月</span><span class="cal-nav">';
+  h+='<button data-d="-1"'+(canPrev?'':' disabled')+'>\\u2039</button>';
+  h+='<button data-d="1"'+(canNext?'':' disabled')+'>\\u203a</button></span></div>';
+  h+='<div class="cal-grid">';
+  for(var i=0;i<7;i++)h+='<span class="cal-wd">'+WD[i]+'</span>';
+  for(var b=0;b<startDow;b++)h+='<span class="cal-empty"></span>';
+  for(var d=1;d<=days;d++){
+    var ds=ym+"-"+p(d);
+    var c="cal-day"+((vY===tY&&vM===tM&&d===tD)?" today":"");
+    if(avail.has(ds))h+='<a class="'+c+' on" href="archive/'+ds+'.html">'+d+'</a>';
+    else h+='<span class="'+c+' off">'+d+'</span>';
+  }
+  h+='</div>';
+  var el=document.getElementById('cal');
+  el.innerHTML=h;
+  el.querySelectorAll('.cal-nav button').forEach(function(btn){
+    if(btn.disabled)return;
+    btn.onclick=function(){
+      vM+=Number(btn.getAttribute('data-d'));
+      if(vM<0){vM=11;vY--;}
+      if(vM>11){vM=0;vY++;}
+      draw();
+    };
+  });
+}
+draw();
+"""
+
+
+def render_calendar(archive_dates, now):
+    """顶部右侧日历容器 + 内联渲染脚本。数据为可用日期列表与今天，均为受控字符串。"""
+    data = f'var DATES={json.dumps(archive_dates)};var TODAY="{now.strftime("%Y-%m-%d")}";\n'
+    return '<div class="cal" id="cal"></div><script>\n(function(){\n' + data + _CAL_JS + '})();\n</script>'
+
+
 def render_index(date_str, body_html, archive_dates, title=None, now=None, lookback_hours=24):
     # 顶部条：左侧订阅入口，右侧推送时间；下方说明抓取时间段
     subscribe = (
@@ -150,8 +221,9 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
             f'{now.strftime(fmt)} 发布的资讯<br>每天 12:00 更新一次，仅含过去 24 小时的新内容。</p>'
         )
     topbar = f'<div class="topbar">{subscribe}</div>{window}'
+    calendar = render_calendar(archive_dates, now) if now is not None else ""
 
-    body = topbar + body_html + render_archive_section(archive_dates)
+    body = calendar + topbar + body_html + render_archive_section(archive_dates)
     page_title = title if title is not None else f"跨境/物流日报 {date_str}"
     return render_page(page_title, body)
 
