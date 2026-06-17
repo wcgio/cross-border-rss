@@ -95,7 +95,8 @@ def run():
         reverse=True,
     )
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
-        f.write(render.render_index(date_str, body_web, archive_dates, title=title))
+        f.write(render.render_index(date_str, body_web, archive_dates, title=title,
+                                    now=now, lookback_hours=LOOKBACK_HOURS))
     with open(os.path.join(DOCS, "digest.xml"), "wb") as f:
         f.write(render.render_rss(date_str, body_rss, count, SITE_URL))
 
