@@ -92,6 +92,13 @@ def test_render_index_calendar_is_archive_no_text_list():
     assert 'class="side"' in page and 'id="cal"' in page  # 归档=右侧日历
 
 
+def test_render_index_base_prefix_for_archive_pages():
+    now = dt.datetime(2026, 6, 17, 12, 0, tzinfo=dt.timezone(dt.timedelta(hours=8)))
+    page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now, base="../")
+    assert 'href="../digest.xml"' in page          # RSS 链接带 ../
+    assert 'BASE="../"' in page                     # 日历日期链接前缀 ../
+
+
 def test_render_index_topbar_and_window():
     now = dt.datetime(2026, 6, 17, 12, 5, tzinfo=dt.timezone(dt.timedelta(hours=8)))
     page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now, lookback_hours=24)

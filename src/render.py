@@ -190,7 +190,7 @@ function draw(){
   for(var d=1;d<=days;d++){
     var ds=ym+"-"+p(d);
     var c="cal-day"+((vY===tY&&vM===tM&&d===tD)?" today":"");
-    if(avail.has(ds))h+='<a class="'+c+' on" href="archive/'+ds+'.html">'+d+'</a>';
+    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds+'.html">'+d+'</a>';
     else h+='<span class="'+c+' off">'+d+'</span>';
   }
   h+='</div>';
@@ -210,17 +210,19 @@ draw();
 """
 
 
-def render_calendar(archive_dates, now):
-    """顶部右侧日历容器 + 内联渲染脚本。数据为可用日期列表与今天，均为受控字符串。"""
-    data = f'var DATES={json.dumps(archive_dates)};var TODAY="{now.strftime("%Y-%m-%d")}";\n'
+def render_calendar(archive_dates, now, base=""):
+    """右侧日历容器 + 内联渲染脚本。base 是回到站点根的相对前缀（归档页用 "../"）。"""
+    data = (f'var DATES={json.dumps(archive_dates)};'
+            f'var TODAY="{now.strftime("%Y-%m-%d")}";'
+            f'var BASE={json.dumps(base)};\n')
     return '<div class="cal" id="cal"></div><script>\n(function(){\n' + data + _CAL_JS + '})();\n</script>'
 
 
-def render_index(date_str, body_html, archive_dates, title=None, now=None, lookback_hours=24):
-    # 顶部条：左侧订阅入口，右侧推送时间；下方说明抓取时间段
+def render_index(date_str, body_html, archive_dates, title=None, now=None, lookback_hours=24, base=""):
+    # base：回到站点根的相对前缀。首页 ""，每日归档页 "../"。
     subscribe = (
         f'<span class="subscribe">订阅：<a href="{TG_CHANNEL}">Telegram 频道</a>'
-        ' · <a href="digest.xml">RSS</a></span>'
+        f' · <a href="{base}digest.xml">RSS</a></span>'
     )
     window = ""
     if now is not None:
@@ -237,7 +239,7 @@ def render_index(date_str, body_html, archive_dates, title=None, now=None, lookb
     if now is None:  # 测试等无时间场景：单栏，无日历
         return render_page(page_title, main)
     # 日历即归档：PC 在右侧栏、移动端落到底部居中
-    side = f'<h2>历史归档</h2>{render_calendar(archive_dates, now)}'
+    side = f'<h2>历史归档</h2>{render_calendar(archive_dates, now, base)}'
     body = (
         f'<div class="layout"><div class="main">{main}</div>'
         f'<aside class="side">{side}</aside></div>'

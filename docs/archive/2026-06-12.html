@@ -8,7 +8,12 @@
 :root { color-scheme: light dark; }
 body { max-width: 720px; margin: 0 auto; padding: 16px;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; }
-h1 { font-size: 1.4em; }
+body.wide { max-width: 980px; }
+h1 { font-size: 1.4em; margin-bottom: 4px; }
+.topbar { display: flex; justify-content: flex-end; font-size: 14px; }
+.window { background: rgba(64, 158, 255, .1); border-left: 4px solid #409eff;
+  border-radius: 0 6px 6px 0; padding: 8px 12px; color: #666; font-size: .85em;
+  margin: 6px 0 16px; }
 h2 { font-size: 1.15em; border-bottom: 1px solid #8884; padding-bottom: 4px; }
 h3 { font-size: 1em; margin: 0 0 4px; }
 article { margin: 12px 0; padding: 12px 14px; border: 1px solid #8883;
@@ -24,6 +29,34 @@ article h3 { margin-top: 0; }
   border: 1px solid rgba(64, 158, 255, .35); border-radius: 6px; padding: 2px 9px; }
 .sources .chip b { color: CanvasText; font-weight: 700; margin-left: 2px; }
 a { color: inherit; }
+details { margin: 4px 0; }
+summary { cursor: pointer; color: #888; }
+.layout { display: flex; gap: 24px; align-items: flex-start; }
+.main { flex: 1; min-width: 0; }
+.side { width: 244px; flex: none; position: sticky; top: 12px; align-self: flex-start; }
+.side h2 { margin-top: 0; }
+.cal { width: 100%; padding: 10px;
+  border: 1px solid #8884; border-radius: 10px; font-size: 13px; box-sizing: border-box; }
+.cal-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cal-title { font-weight: 600; }
+.cal-nav button { background: none; border: none; color: inherit; cursor: pointer;
+  font-size: 16px; line-height: 1; padding: 0 5px; }
+.cal-nav button[disabled] { opacity: .25; cursor: default; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cal-wd { color: #888; font-size: 11px; padding: 2px 0; }
+.cal-day { display: flex; align-items: center; justify-content: center; aspect-ratio: 1;
+  border-radius: 50%; text-decoration: none; }
+.cal-day.on { color: #409eff; }
+.cal-day.on:hover { background: rgba(64, 158, 255, .14); }
+.cal-day.off { color: #bbb; }
+.cal-day.today { background: #409eff; color: #fff; font-weight: 600; }
+.cal-empty { aspect-ratio: 1; }
+@media (max-width: 760px) {
+  body.wide { max-width: 720px; }
+  .layout { flex-direction: column; }
+  .side { width: 100%; position: static; }
+  .cal { max-width: 320px; margin: 0 auto; }
+}
 .tabs > input { display: none; }
 .tab-bar { display: flex; gap: 4px; flex-wrap: wrap; margin: 12px 0 0;
   border-bottom: 1px solid #8884; position: sticky; top: 0;
@@ -43,9 +76,54 @@ a { color: inherit; }
 #tab-market:checked ~ #panel-market { display: block; }
 </style>
 </head>
-<body>
+<body class="wide">
 <h1>跨境/物流日报 2026-06-12（18 条）</h1>
-<div class="sources"><span class="chip">亿邦动力 · 跨境电商 <b>6</b></span><span class="chip">FreightWaves <b>3</b></span><span class="chip">The Loadstar <b>3</b></span><span class="chip">Modern Retail <b>3</b></span><span class="chip">EcommerceBytes <b>1</b></span><span class="chip">ChannelX（欧洲电商/eBay） <b>1</b></span><span class="chip">Splash247 <b>1</b></span></div><div class="tabs"><input type="radio" name="tab" id="tab-platform" checked><input type="radio" name="tab" id="tab-logistics"><input type="radio" name="tab" id="tab-compliance"><input type="radio" name="tab" id="tab-market"><nav class="tab-bar"><label for="tab-platform">平台政策 <span class="count">2</span></label><label for="tab-logistics">国际物流 <span class="count">5</span></label><label for="tab-compliance">关税合规 <span class="count">3</span></label><label for="tab-market">大盘趋势 <span class="count">8</span></label></nav><section class="panel" id="panel-platform"><article class="high"><h3><span class="badge">重点</span>Amazon to Use AI to Enforce New Product Title Limits</h3><p class="meta">EcommerceBytes</p><p>亚马逊今年将进一步缩短商品标题的字符限制，并使用人工智能强制执行该政策。新规规定标题最长为200个字符，这一调整将影响所有卖家的商品展示和搜索排名，生效时间尚未明确。</p><p class="meta"><a href="https://www.ecommercebytes.com/2026/06/11/amazon-to-use-ai-to-enforce-new-product-title-limits/">原文 ↗</a></p></article><article class="normal"><h3>敦煌网纠纷流程调整：协商期延长至15天并新增15天休眠期</h3><p class="meta">亿邦动力 · 跨境电商</p><p>敦煌网近日宣布纠纷流程的调整，协商期延长至15天，同时新增15天的休眠期。这将影响平台卖家的纠纷解决时间，需密切关注后续操作。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680384.html">原文 ↗</a></p></article></section><section class="panel" id="panel-logistics"><article class="high"><h3><span class="badge">重点</span>Wildberries推出“海关直送仓”新模式：取消中间转运环节以降本增效</h3><p class="meta">亿邦动力 · 跨境电商</p><p>Wildberries推出的新物流模式，将取消中间转运环节，直接将货物送达指定仓库。此模式将在未来几个月内扩展到更多卖家，预计将帮助卖家显著降低仓储和二次包装等物流成本，并提升资金周转速度。对高频大批量发货的卖家影响尤为明显。</p><p class="meta"><a href="https://m.ebrun.com/680378.html">原文 ↗</a></p></article><article class="high"><h3><span class="badge">重点</span>TIA asking FMCSA for guidance on approved carriers post-Montgomery</h3><p class="meta">FreightWaves</p><p>美国运输中介协会（TIA）已经向联邦机动车安全管理局（FMCSA）申请，要求制定标准来判断什么样的承运商可以安全预定。此请求源于近期的蒙哥马利诉加勒比运输案，该案例增加了货运代理在选择承运商时的法律责任。TIA指出，目前超过90%的获授权承运商没有FMCSA安全评级，这使得货运代理在评估承运商安全性时面临困难。</p><p class="meta"><a href="https://www.freightwaves.com/news/tia-asking-fmcsa-for-guidance-on-approved-carriers-post-montgomery">原文 ↗</a></p></article><article class="normal"><h3>越南收紧中国货物过境管理 仅限4对口岸通行且停留不超30天</h3><p class="meta">亿邦动力 · 跨境电商</p><p>越南对中国货物的过境管理进行了收紧，仅允许在4对口岸通行，并限制停留不超过30天，这可能会影响跨境电商卖家的物流安排。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680365.html">原文 ↗</a></p></article><article class="normal"><h3>DHL restores Gulf network, but airlines stay wary after latest strikes</h3><p class="meta">The Loadstar</p><p>尽管DHL已恢复海湾地区的空运网络，但由于美国和伊朗间的新一轮空袭，航空公司对该区域的运营依然保持谨慎，这可能造成进一步的运输延误。</p><p class="meta"><a href="https://theloadstar.com/dhl-restores-gulf-network-but-airlines-stay-wary-after-latest-strikes/">原文 ↗</a></p></article><article class="normal"><h3>UPS meets deadline for retrofitting delivery vans with air conditioning</h3><p class="meta">FreightWaves</p><p>UPS按时完成了在最热地区为2000辆包裹送货面包车加装空调的任务，截止日期是6月1日。这项改进旨在提高驾驶员在高温条件下的安全性和舒适度。</p><p class="meta"><a href="https://www.freightwaves.com/news/ups-meets-deadline-for-retrofitting-delivery-vans-with-air-conditioning">原文 ↗</a></p></article></section><section class="panel" id="panel-compliance"><article class="high"><h3><span class="badge">重点</span>Importers race to beat the deadline for looming EU ecommerce fee</h3><p class="meta">The Loadstar</p><p>欧盟计划从7月1日起对低价值电子商务货物征收3欧元的费用，预计将导致亚欧空运市场的波动加大。货运代理商提醒进口商需在最后期限前加快货物进口，以避免费用增加所带来的影响。</p><p class="meta"><a href="https://theloadstar.com/importers-race-to-beat-the-deadline-for-looming-eu-ecommerce-fee/">原文 ↗</a></p></article><article class="high"><h3><span class="badge">重点</span>Marketplace Briefing: Online merchants welcome Trump customs crackdown amid wave of tariff evasion pitches</h3><p class="meta">Modern Retail</p><p>特朗普政府近期签署了一项行政命令，旨在加强对海关欺诈的打击，特别是针对那些未足额支付关税的进口商。此措施将增强海关和边境保护局的执法力度，预计将对跨境电商卖家产生影响，因为它可能改变进口商品的合规性和相关成本。</p><p class="meta"><a href="https://www.modernretail.co/operations/marketplace-briefing-online-merchants-welcome-trump-customs-crackdown-amid-wave-of-tariff-evasion-pitches/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article><article class="normal"><h3>加州纺织品EPR注册要求7月1日前生效</h3><p class="meta">亿邦动力 · 跨境电商</p><p>加州即将实施纺织品EPR注册要求，卖家需在7月1日前完成相关注册。该政策将影响在加州销售纺织品的电商卖家。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680366.html">原文 ↗</a></p></article></section><section class="panel" id="panel-market"><article class="high"><h3><span class="badge">重点</span>US shippers warn revived China ship fees could ‘eliminate’ ag exports</h3><p class="meta">The Loadstar</p><p>美国农业出口商警告称，华盛顿计划对中国制造的船只征收惩罚性费用，可能会导致运输成本增加每个集装箱900美元，这将对包括农业在内的多个商品的出口销售造成巨大损害。相关措施的讨论已于近期升级，可能会对跨境电商卖家产生间接影响。</p><p class="meta"><a href="https://theloadstar.com/us-shippers-warn-revived-china-ship-fees-could-eliminate-ag-exports/">原文 ↗</a></p></article><article class="normal"><h3>Yandex Market上线人民币结算功能 卢布账户将于2026年7月1日停用</h3><p class="meta">亿邦动力 · 跨境电商</p><p>Yandex Market即将上线人民币结算功能，但计划于2026年7月1日停止使用卢布账户，这对在该平台操作的跨境卖家需要注意。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680364.html">原文 ↗</a></p></article><article class="normal"><h3>印尼拟推新规：小微电商卖家或享平台服务费五折优惠</h3><p class="meta">亿邦动力 · 跨境电商</p><p>印尼计划推出新规，小微电商卖家可享受平台服务费五折优惠，这为小型卖家提供了成本减免的机会。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680363.html">原文 ↗</a></p></article><article class="normal"><h3>easyDelivery launches with 350,000 pickup and drop-off locations across Europe</h3><p class="meta">ChannelX（欧洲电商/eBay）</p><p>easyDelivery 正式推出其消费者交付平台，提供超过 350,000 个取件和投递位置，涵盖英国和欧洲。该平台旨在整合包裹交付、本地商业和商家履行服务。</p><p class="meta"><a href="https://channelx.world/2026/06/easydelivery-launches-with-350000-pickup-and-drop-off-locations-across-europe/">原文 ↗</a></p></article><article class="normal"><h3>Montgomery ruling, cargo fraud dominate Texas cross-border trade summit</h3><p class="meta">FreightWaves</p><p>在德克萨斯州拉雷多举行的第九届跨境贸易现代化会议上，与会者讨论了与贸易、运输和物流相关的正在进行的政策辩论，以及美国、墨西哥和加拿大协定（USMCA）下一阶段的准备工作。会议吸引了500多位行业代表，强调了拉雷多作为北美领先内陆港的重要性。</p><p class="meta"><a href="https://www.freightwaves.com/news/montgomery-ruling-cargo-fraud-dominate-texas-cross-border-trade-summit">原文 ↗</a></p></article><article class="normal"><h3>Critical minerals reshaping global trade: UNCTAD</h3><p class="meta">Splash247</p><p>根据联合国贸易和发展会议（UNCTAD）的一份最新报告，全球对关键矿物的竞争正在重塑贸易流动、工业政策和供应链。这为航运业带来了新的机遇和挑战。</p><p class="meta"><a href="https://splash247.com/critical-minerals-reshaping-global-trade-unctad/">原文 ↗</a></p></article><article class="normal"><h3>Open-box marketplace Rebel is now selling better-for-you snacks</h3><p class="meta">Modern Retail</p><p>Open-box市场Rebel正在推出更健康的零食，意在通过销售临近最佳消费日期的库存商品，吸引更多消费者。新产品线包括多种品牌的保质零食，折扣范围达到12-70%。</p><p class="meta"><a href="https://www.modernretail.co/operations/open-box-marketplace-rebel-is-now-selling-better-for-you-snacks/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article><article class="normal"><h3>Scenes from Walmart’s annual Associates Week and shareholder meeting</h3><p class="meta">Modern Retail</p><p>沃尔玛正在努力展示其拥有最新和最时尚的商品，并承诺提供更快的配送服务。此次年度会议提供了关于零售动态的内部分析和背景。</p><p class="meta"><a href="https://www.modernretail.co/operations/scenes-from-walmarts-annual-associates-week-and-shareholder-meeting/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article></section></div>
+<div class="layout"><div class="main"><div class="topbar"><span class="subscribe">订阅：<a href="https://t.me/crossborderdaily">Telegram 频道</a> · <a href="../digest.xml">RSS</a></span></div><p class="window">本期收录北京时间 2026-06-11 12:00 至 2026-06-12 12:00 发布的资讯<br>每天 12:00 更新一次，仅含过去 24 小时的新内容。</p><div class="sources"><span class="chip">亿邦动力 · 跨境电商 <b>6</b></span><span class="chip">FreightWaves <b>3</b></span><span class="chip">The Loadstar <b>3</b></span><span class="chip">Modern Retail <b>3</b></span><span class="chip">EcommerceBytes <b>1</b></span><span class="chip">ChannelX（欧洲电商/eBay） <b>1</b></span><span class="chip">Splash247 <b>1</b></span></div><div class="tabs"><input type="radio" name="tab" id="tab-platform" checked><input type="radio" name="tab" id="tab-logistics"><input type="radio" name="tab" id="tab-compliance"><input type="radio" name="tab" id="tab-market"><nav class="tab-bar"><label for="tab-platform">平台政策 <span class="count">2</span></label><label for="tab-logistics">国际物流 <span class="count">5</span></label><label for="tab-compliance">关税合规 <span class="count">3</span></label><label for="tab-market">大盘趋势 <span class="count">8</span></label></nav><section class="panel" id="panel-platform"><article class="high"><h3><span class="badge">重点</span>Amazon to Use AI to Enforce New Product Title Limits</h3><p class="meta">EcommerceBytes</p><p>亚马逊今年将进一步缩短商品标题的字符限制，并使用人工智能强制执行该政策。新规规定标题最长为200个字符，这一调整将影响所有卖家的商品展示和搜索排名，生效时间尚未明确。</p><p class="meta"><a href="https://www.ecommercebytes.com/2026/06/11/amazon-to-use-ai-to-enforce-new-product-title-limits/">原文 ↗</a></p></article><article class="normal"><h3>敦煌网纠纷流程调整：协商期延长至15天并新增15天休眠期</h3><p class="meta">亿邦动力 · 跨境电商</p><p>敦煌网近日宣布纠纷流程的调整，协商期延长至15天，同时新增15天的休眠期。这将影响平台卖家的纠纷解决时间，需密切关注后续操作。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680384.html">原文 ↗</a></p></article></section><section class="panel" id="panel-logistics"><article class="high"><h3><span class="badge">重点</span>Wildberries推出“海关直送仓”新模式：取消中间转运环节以降本增效</h3><p class="meta">亿邦动力 · 跨境电商</p><p>Wildberries推出的新物流模式，将取消中间转运环节，直接将货物送达指定仓库。此模式将在未来几个月内扩展到更多卖家，预计将帮助卖家显著降低仓储和二次包装等物流成本，并提升资金周转速度。对高频大批量发货的卖家影响尤为明显。</p><p class="meta"><a href="https://m.ebrun.com/680378.html">原文 ↗</a></p></article><article class="high"><h3><span class="badge">重点</span>TIA asking FMCSA for guidance on approved carriers post-Montgomery</h3><p class="meta">FreightWaves</p><p>美国运输中介协会（TIA）已经向联邦机动车安全管理局（FMCSA）申请，要求制定标准来判断什么样的承运商可以安全预定。此请求源于近期的蒙哥马利诉加勒比运输案，该案例增加了货运代理在选择承运商时的法律责任。TIA指出，目前超过90%的获授权承运商没有FMCSA安全评级，这使得货运代理在评估承运商安全性时面临困难。</p><p class="meta"><a href="https://www.freightwaves.com/news/tia-asking-fmcsa-for-guidance-on-approved-carriers-post-montgomery">原文 ↗</a></p></article><article class="normal"><h3>越南收紧中国货物过境管理 仅限4对口岸通行且停留不超30天</h3><p class="meta">亿邦动力 · 跨境电商</p><p>越南对中国货物的过境管理进行了收紧，仅允许在4对口岸通行，并限制停留不超过30天，这可能会影响跨境电商卖家的物流安排。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680365.html">原文 ↗</a></p></article><article class="normal"><h3>DHL restores Gulf network, but airlines stay wary after latest strikes</h3><p class="meta">The Loadstar</p><p>尽管DHL已恢复海湾地区的空运网络，但由于美国和伊朗间的新一轮空袭，航空公司对该区域的运营依然保持谨慎，这可能造成进一步的运输延误。</p><p class="meta"><a href="https://theloadstar.com/dhl-restores-gulf-network-but-airlines-stay-wary-after-latest-strikes/">原文 ↗</a></p></article><article class="normal"><h3>UPS meets deadline for retrofitting delivery vans with air conditioning</h3><p class="meta">FreightWaves</p><p>UPS按时完成了在最热地区为2000辆包裹送货面包车加装空调的任务，截止日期是6月1日。这项改进旨在提高驾驶员在高温条件下的安全性和舒适度。</p><p class="meta"><a href="https://www.freightwaves.com/news/ups-meets-deadline-for-retrofitting-delivery-vans-with-air-conditioning">原文 ↗</a></p></article></section><section class="panel" id="panel-compliance"><article class="high"><h3><span class="badge">重点</span>Importers race to beat the deadline for looming EU ecommerce fee</h3><p class="meta">The Loadstar</p><p>欧盟计划从7月1日起对低价值电子商务货物征收3欧元的费用，预计将导致亚欧空运市场的波动加大。货运代理商提醒进口商需在最后期限前加快货物进口，以避免费用增加所带来的影响。</p><p class="meta"><a href="https://theloadstar.com/importers-race-to-beat-the-deadline-for-looming-eu-ecommerce-fee/">原文 ↗</a></p></article><article class="high"><h3><span class="badge">重点</span>Marketplace Briefing: Online merchants welcome Trump customs crackdown amid wave of tariff evasion pitches</h3><p class="meta">Modern Retail</p><p>特朗普政府近期签署了一项行政命令，旨在加强对海关欺诈的打击，特别是针对那些未足额支付关税的进口商。此措施将增强海关和边境保护局的执法力度，预计将对跨境电商卖家产生影响，因为它可能改变进口商品的合规性和相关成本。</p><p class="meta"><a href="https://www.modernretail.co/operations/marketplace-briefing-online-merchants-welcome-trump-customs-crackdown-amid-wave-of-tariff-evasion-pitches/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article><article class="normal"><h3>加州纺织品EPR注册要求7月1日前生效</h3><p class="meta">亿邦动力 · 跨境电商</p><p>加州即将实施纺织品EPR注册要求，卖家需在7月1日前完成相关注册。该政策将影响在加州销售纺织品的电商卖家。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680366.html">原文 ↗</a></p></article></section><section class="panel" id="panel-market"><article class="high"><h3><span class="badge">重点</span>US shippers warn revived China ship fees could ‘eliminate’ ag exports</h3><p class="meta">The Loadstar</p><p>美国农业出口商警告称，华盛顿计划对中国制造的船只征收惩罚性费用，可能会导致运输成本增加每个集装箱900美元，这将对包括农业在内的多个商品的出口销售造成巨大损害。相关措施的讨论已于近期升级，可能会对跨境电商卖家产生间接影响。</p><p class="meta"><a href="https://theloadstar.com/us-shippers-warn-revived-china-ship-fees-could-eliminate-ag-exports/">原文 ↗</a></p></article><article class="normal"><h3>Yandex Market上线人民币结算功能 卢布账户将于2026年7月1日停用</h3><p class="meta">亿邦动力 · 跨境电商</p><p>Yandex Market即将上线人民币结算功能，但计划于2026年7月1日停止使用卢布账户，这对在该平台操作的跨境卖家需要注意。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680364.html">原文 ↗</a></p></article><article class="normal"><h3>印尼拟推新规：小微电商卖家或享平台服务费五折优惠</h3><p class="meta">亿邦动力 · 跨境电商</p><p>印尼计划推出新规，小微电商卖家可享受平台服务费五折优惠，这为小型卖家提供了成本减免的机会。</p><p class="meta"><a href="https://m.ebrun.com/ebrungo/zb/680363.html">原文 ↗</a></p></article><article class="normal"><h3>easyDelivery launches with 350,000 pickup and drop-off locations across Europe</h3><p class="meta">ChannelX（欧洲电商/eBay）</p><p>easyDelivery 正式推出其消费者交付平台，提供超过 350,000 个取件和投递位置，涵盖英国和欧洲。该平台旨在整合包裹交付、本地商业和商家履行服务。</p><p class="meta"><a href="https://channelx.world/2026/06/easydelivery-launches-with-350000-pickup-and-drop-off-locations-across-europe/">原文 ↗</a></p></article><article class="normal"><h3>Montgomery ruling, cargo fraud dominate Texas cross-border trade summit</h3><p class="meta">FreightWaves</p><p>在德克萨斯州拉雷多举行的第九届跨境贸易现代化会议上，与会者讨论了与贸易、运输和物流相关的正在进行的政策辩论，以及美国、墨西哥和加拿大协定（USMCA）下一阶段的准备工作。会议吸引了500多位行业代表，强调了拉雷多作为北美领先内陆港的重要性。</p><p class="meta"><a href="https://www.freightwaves.com/news/montgomery-ruling-cargo-fraud-dominate-texas-cross-border-trade-summit">原文 ↗</a></p></article><article class="normal"><h3>Critical minerals reshaping global trade: UNCTAD</h3><p class="meta">Splash247</p><p>根据联合国贸易和发展会议（UNCTAD）的一份最新报告，全球对关键矿物的竞争正在重塑贸易流动、工业政策和供应链。这为航运业带来了新的机遇和挑战。</p><p class="meta"><a href="https://splash247.com/critical-minerals-reshaping-global-trade-unctad/">原文 ↗</a></p></article><article class="normal"><h3>Open-box marketplace Rebel is now selling better-for-you snacks</h3><p class="meta">Modern Retail</p><p>Open-box市场Rebel正在推出更健康的零食，意在通过销售临近最佳消费日期的库存商品，吸引更多消费者。新产品线包括多种品牌的保质零食，折扣范围达到12-70%。</p><p class="meta"><a href="https://www.modernretail.co/operations/open-box-marketplace-rebel-is-now-selling-better-for-you-snacks/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article><article class="normal"><h3>Scenes from Walmart’s annual Associates Week and shareholder meeting</h3><p class="meta">Modern Retail</p><p>沃尔玛正在努力展示其拥有最新和最时尚的商品，并承诺提供更快的配送服务。此次年度会议提供了关于零售动态的内部分析和背景。</p><p class="meta"><a href="https://www.modernretail.co/operations/scenes-from-walmarts-annual-associates-week-and-shareholder-meeting/?utm_campaign=modernretaildis&amp;utm_medium=rss&amp;utm_source=general-rss">原文 ↗</a></p></article></section></div></div><aside class="side"><h2>历史归档</h2><div class="cal" id="cal"></div><script>
+(function(){
+var DATES=["2026-06-17", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-06-12", "2026-06-11"];var TODAY="2026-06-12";var BASE="../";
+
+var avail=new Set(DATES);
+var sorted=DATES.slice().sort();
+var minYM=sorted.length?sorted[0].slice(0,7):TODAY.slice(0,7);
+var curYM=TODAY.slice(0,7);
+var tp=TODAY.split("-").map(Number);
+var tY=tp[0],tM=tp[1]-1,tD=tp[2];
+var vY=tY,vM=tM;
+var WD=["日","一","二","三","四","五","六"];
+function p(n){return(n<10?"0":"")+n;}
+function draw(){
+  var ym=vY+"-"+p(vM+1);
+  var startDow=new Date(vY,vM,1).getDay();
+  var days=new Date(vY,vM+1,0).getDate();
+  var canPrev=ym>minYM,canNext=ym<curYM;
+  var h='<div class="cal-hd"><span class="cal-title">'+vY+'年'+(vM+1)+'月</span><span class="cal-nav">';
+  h+='<button data-d="-1"'+(canPrev?'':' disabled')+'>\u2039</button>';
+  h+='<button data-d="1"'+(canNext?'':' disabled')+'>\u203a</button></span></div>';
+  h+='<div class="cal-grid">';
+  for(var i=0;i<7;i++)h+='<span class="cal-wd">'+WD[i]+'</span>';
+  for(var b=0;b<startDow;b++)h+='<span class="cal-empty"></span>';
+  for(var d=1;d<=days;d++){
+    var ds=ym+"-"+p(d);
+    var c="cal-day"+((vY===tY&&vM===tM&&d===tD)?" today":"");
+    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds+'.html">'+d+'</a>';
+    else h+='<span class="'+c+' off">'+d+'</span>';
+  }
+  h+='</div>';
+  var el=document.getElementById('cal');
+  el.innerHTML=h;
+  el.querySelectorAll('.cal-nav button').forEach(function(btn){
+    if(btn.disabled)return;
+    btn.onclick=function(){
+      vM+=Number(btn.getAttribute('data-d'));
+      if(vM<0){vM=11;vY--;}
+      if(vM>11){vM=0;vY++;}
+      draw();
+    };
+  });
+}
+draw();
+})();
+</script></aside></div>
 <footer class="meta"><p></p></footer>
 </body>
 </html>

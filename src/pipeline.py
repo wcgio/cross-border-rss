@@ -87,16 +87,19 @@ def run():
         title += "【今日抓取异常】"
 
     os.makedirs(os.path.join(DOCS, "archive"), exist_ok=True)
+    existing = [n[:-5] for n in os.listdir(os.path.join(DOCS, "archive"))
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", n)]
+    if date_str not in existing:
+        existing.append(date_str)
+    archive_dates = sorted(existing, reverse=True)
+
+    # 每日归档页与首页同样布局（含右侧日历）；归档页在 /archive/ 下，链接前缀 "../"
     with open(os.path.join(DOCS, "archive", f"{date_str}.html"), "w", encoding="utf-8") as f:
-        f.write(render.render_page(title, body_web))
-    archive_dates = sorted(
-        (n[:-5] for n in os.listdir(os.path.join(DOCS, "archive"))
-         if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", n)),
-        reverse=True,
-    )
+        f.write(render.render_index(date_str, body_web, archive_dates, title=title,
+                                    now=now, lookback_hours=LOOKBACK_HOURS, base="../"))
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(render.render_index(date_str, body_web, archive_dates, title=title,
-                                    now=now, lookback_hours=LOOKBACK_HOURS))
+                                    now=now, lookback_hours=LOOKBACK_HOURS, base=""))
     with open(os.path.join(DOCS, "digest.xml"), "wb") as f:
         f.write(render.render_rss(date_str, body_rss, count, SITE_URL))
 
