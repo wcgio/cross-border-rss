@@ -4,6 +4,11 @@ on:
   # 不用 GitHub schedule（整点常被延迟/丢弃）。改由 Cloudflare Worker 的 Cron Trigger
   # 在北京时间 12:00 准点调 workflow_dispatch 触发，见 cron-trigger/。
   workflow_dispatch:
+    inputs:
+      deploy_only:
+        description: "仅部署当前 docs/ 到 Cloudflare Pages，不抓取或推送日报"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # commit 产物回仓库
@@ -23,6 +28,7 @@ jobs:
 
   digest:
     needs: test
+    if: ${{ !inputs.deploy_only }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -65,3 +71,14 @@ jobs:
             -F title="跨境日报 workflow 失败" \
             -F message="run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             -F priority=8 || true
+
+  deploy-existing:
+    if: ${{ inputs.deploy_only }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Deploy existing Pages assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ea310efac77a0a5ecf70c13fae407fbc
+        run: npx wrangler pages deploy docs --project-name cross-border-rss --branch main
