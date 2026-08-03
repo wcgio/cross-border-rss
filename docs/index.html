@@ -105,7 +105,7 @@ function draw(){
   for(var d=1;d<=days;d++){
     var ds=ym+"-"+p(d);
     var c="cal-day"+((vY===tY&&vM===tM&&d===tD)?" today":"");
-    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds+'.html">'+d+'</a>';
+    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds">'+d+'</a>';
     else h+='<span class="'+c+' off">'+d+'</span>';
   }
   h+='</div>';

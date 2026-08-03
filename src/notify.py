@@ -21,7 +21,7 @@ def telegram_messages(groups, categories, date_str, site_url):
                 text += f"\n{it['summary']}"
             text += f"\n{it['url']}"
             blocks.append(text[:TG_LIMIT - 50])
-    blocks.append(f"\n网页版：{site_url}/archive/{date_str}.html")
+    blocks.append(f"\n网页版：{site_url}/archive/{date_str}")
 
     msgs, cur = [], ""
     for block in blocks:

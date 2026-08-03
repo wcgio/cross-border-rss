@@ -87,16 +87,21 @@ def run():
         title += "【今日抓取异常】"
 
     os.makedirs(os.path.join(DOCS, "archive"), exist_ok=True)
-    existing = [n[:-5] for n in os.listdir(os.path.join(DOCS, "archive"))
-                if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", n)]
+    archive_dir = os.path.join(DOCS, "archive")
+    existing = [n for n in os.listdir(archive_dir)
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", n)
+                and os.path.isfile(os.path.join(archive_dir, n, "index.html"))]
     if date_str not in existing:
         existing.append(date_str)
     archive_dates = sorted(existing, reverse=True)
 
-    # 每日归档页与首页同样布局（含右侧日历）；归档页在 /archive/ 下，链接前缀 "../"
-    with open(os.path.join(DOCS, "archive", f"{date_str}.html"), "w", encoding="utf-8") as f:
+    # Pages 会将 .html 规范化到无扩展名路径。每日报放在同名目录的 index.html，
+    # 使 /archive/YYYY-MM-DD 有真实静态资源；目录页回根目录需 ../../。
+    daily_archive_dir = os.path.join(archive_dir, date_str)
+    os.makedirs(daily_archive_dir, exist_ok=True)
+    with open(os.path.join(daily_archive_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(render.render_index(date_str, body_web, archive_dates, title=title,
-                                    now=now, lookback_hours=LOOKBACK_HOURS, base="../"))
+                                    now=now, lookback_hours=LOOKBACK_HOURS, base="../../"))
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(render.render_index(date_str, body_web, archive_dates, title=title,
                                     now=now, lookback_hours=LOOKBACK_HOURS, base=""))

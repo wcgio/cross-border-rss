@@ -10,7 +10,8 @@ def test_telegram_messages_contains_content_and_link():
     msgs = notify.telegram_messages(GROUPS, CATS, "2026-06-11", "https://rss.cgio.qzz.io")
     assert len(msgs) == 1
     assert "平台政策" in msgs[0] and "总结" in msgs[0]
-    assert "https://rss.cgio.qzz.io/archive/2026-06-11.html" in msgs[0]
+    assert "https://rss.cgio.qzz.io/archive/2026-06-11" in msgs[0]
+    assert "https://rss.cgio.qzz.io/archive/2026-06-11.html" not in msgs[0]
 
 
 def test_telegram_messages_splits_long_content():

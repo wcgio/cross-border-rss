@@ -40,7 +40,10 @@ def test_run_produces_outputs(tmp_path, monkeypatch):
     today = dt.datetime.now(pipeline.TZ8).date().isoformat()
     assert (tmp_path / "docs" / "digest.xml").exists()
     assert (tmp_path / "docs" / "index.html").exists()
-    assert (tmp_path / "docs" / "archive" / f"{today}.html").exists()
+    assert (tmp_path / "docs" / "archive" / today / "index.html").exists()
+    archive = (tmp_path / "docs" / "archive" / today / "index.html").read_text(encoding="utf-8")
+    assert 'BASE="../../"' in archive
+    assert "archive/'+ds+'.html" not in archive
     seen = json.loads((tmp_path / "data" / "seen.json").read_text(encoding="utf-8"))
     assert "https://example.com/a1" in seen
     assert sent and "Ocean freight rates jump 20%" in sent[0]

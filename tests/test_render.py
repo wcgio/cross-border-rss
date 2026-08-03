@@ -37,7 +37,8 @@ def test_render_rss_one_entry_per_day():
     xml = render.render_rss("2026-06-11", "<p>BODY</p>", 5, "https://rss.cgio.qzz.io")
     assert b"digest-2026-06-11" in xml
     assert "跨境/物流日报 2026-06-11（5 条）".encode() in xml
-    assert b"rss.cgio.qzz.io/archive/2026-06-11.html" in xml
+    assert b"rss.cgio.qzz.io/archive/2026-06-11" in xml
+    assert b"rss.cgio.qzz.io/archive/2026-06-11.html" not in xml
 
 
 def test_render_groups_html_blocks_javascript_urls():
@@ -97,6 +98,13 @@ def test_render_index_base_prefix_for_archive_pages():
     page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now, base="../")
     assert 'href="../digest.xml"' in page          # RSS 链接带 ../
     assert 'BASE="../"' in page                     # 日历日期链接前缀 ../
+
+
+def test_render_index_calendar_links_to_extensionless_archive_route():
+    now = dt.datetime(2026, 6, 17, 12, 0, tzinfo=dt.timezone(dt.timedelta(hours=8)))
+    page = render.render_index("2026-06-17", "<p>B</p>", ["2026-06-17"], now=now)
+    assert "archive/'+ds" in page
+    assert "archive/'+ds+'.html" not in page
 
 
 def test_render_index_topbar_and_window():

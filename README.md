@@ -8,7 +8,7 @@ Cloudflare Pages → Telegram 推送。崩溃时 Gotify 通知。
 
 - 网页日报：https://rss.cgio.qzz.io/
 - RSS 订阅：https://rss.cgio.qzz.io/digest.xml
-- 历史归档：https://rss.cgio.qzz.io/archive/YYYY-MM-DD.html
+- 历史归档：https://rss.cgio.qzz.io/archive/YYYY-MM-DD
 - Telegram：bot 每天推送到频道
 
 > 由 Cloudflare Worker 在 12:00 准点触发，通常一两分钟内开始运行。

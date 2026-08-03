@@ -190,7 +190,7 @@ function draw(){
   for(var d=1;d<=days;d++){
     var ds=ym+"-"+p(d);
     var c="cal-day"+((vY===tY&&vM===tM&&d===tD)?" today":"");
-    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds+'.html">'+d+'</a>';
+    if(avail.has(ds))h+='<a class="'+c+' on" href="'+BASE+'archive/'+ds+'">'+d+'</a>';
     else h+='<span class="'+c+' off">'+d+'</span>';
   }
   h+='</div>';
@@ -257,7 +257,7 @@ def render_rss(date_str, body_html, item_count, site_url):
     fe.id(f"digest-{date_str}")
     suffix = f"（{item_count} 条）" if item_count else "（无新内容）"
     fe.title(f"跨境/物流日报 {date_str}{suffix}")
-    fe.link(href=f"{site_url}/archive/{date_str}.html")
+    fe.link(href=f"{site_url}/archive/{date_str}")
     fe.guid(f"digest-{date_str}", permalink=False)
     fe.pubDate(dt.datetime.now(TZ8))
     fe.content(body_html, type="CDATA")
