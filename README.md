@@ -26,6 +26,7 @@ Cloudflare Pages → Telegram 推送。崩溃时 Gotify 通知。
 | `TG_CHAT_ID` | 推送目标：频道 `@用户名` 或 `-100` 开头 ID |
 | `GOTIFY_URL` | Gotify 服务地址 |
 | `GOTIFY_TOKEN` | Gotify 应用 token |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token，供日报工作流部署 Pages；权限选 Account / Cloudflare Pages / Edit |
 
 AI 总结使用 GitHub Models，workflow 内置 `GITHUB_TOKEN` 即可调用，无需额外配置。
 

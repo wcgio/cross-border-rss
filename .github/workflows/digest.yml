@@ -49,6 +49,11 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: daily digest $(date -u +%F)"
           git pull --rebase
           git push
+      - name: Deploy Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ea310efac77a0a5ecf70c13fae407fbc
+        run: npx wrangler pages deploy docs --project-name cross-border-rss --branch main
       - name: Gotify on failure
         if: failure()
         env:
